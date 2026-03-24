@@ -81,8 +81,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     href: "/students",
     character: "piano",
     stage: {
-      left: "11.5%",
-      bottom: "23.5%",
+      left: "6.5%",
+      bottom: "38.5%",
       width: "28.5%",
       zIndex: 12,
     },
@@ -105,7 +105,7 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "eguitar",
     stage: {
       left: "26%",
-      bottom: "31.5%",
+      bottom: "45.5%",
       width: "22.5%",
       zIndex: 15,
     },
@@ -128,8 +128,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "guitar",
     stage: {
       left: "35%",
-      bottom: "9.5%",
-      width: "10.5%",
+      bottom: "48.5%",
+      width: "22.5%",
       zIndex: 16,
     },
     signBox: {
@@ -151,8 +151,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "drums",
     stage: {
       left: "50.5%",
-      bottom: "10.5%",
-      width: "17.5%",
+      bottom: "60.5%",
+      width: "27.5%",
       zIndex: 11,
     },
     signBox: {
@@ -174,8 +174,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "saxophone",
     stage: {
       left: "69%",
-      bottom: "6.5%",
-      width: "9.75%",
+      bottom: "45.5%",
+      width: "20.75%",
       zIndex: 15,
     },
     signBox: {
@@ -197,8 +197,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "violin",
     stage: {
       left: "83%",
-      bottom: "1%",
-      width: "9.25%",
+      bottom: "38%",
+      width: "22.25%",
       zIndex: 12,
     },
     signBox: {
