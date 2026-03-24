@@ -705,7 +705,7 @@ export default function Students() {
   return (
     <InnerPageLayout
       title="תלמידות"
-      description="מסלול מוסיקלי עמוק, אנושי ומסודר לתלמידות — עם שיעור, תרגול, רצף ומערכת תומכת."
+      description="מסלול מוסיקלי יסודי, אנושי ומסודר לתלמידות — עם שיעור, תרגול, רצף ומערכת תומכת."
     >
       <main dir="rtl" className="pb-40">
         <style>{`
