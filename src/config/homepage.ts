@@ -82,8 +82,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "piano",
     stage: {
       left: "11.5%",
-      bottom: "0.5%",
-      width: "18.5%",
+      bottom: "23.5%",
+      width: "28.5%",
       zIndex: 12,
     },
     signBox: {
@@ -105,8 +105,8 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     character: "eguitar",
     stage: {
       left: "26%",
-      bottom: "7.5%",
-      width: "10.5%",
+      bottom: "31.5%",
+      width: "22.5%",
       zIndex: 15,
     },
     signBox: {
