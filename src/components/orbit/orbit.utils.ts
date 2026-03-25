@@ -1,52 +1,98 @@
+import { ANGLE_SECTORS } from "./orbit.constants";
+import type {
+  PresenterPoseKey,
+  PresenterAssets,
+  ResolvedPresenterAssets,
+  LegacyAvatarKey,
+} from "./orbit.types";
 
+/* ── angle helpers ── */
 
-## סיכום הבעיות
+/** Returns degrees 0-360 measured clockwise from 12-o'clock. */
+export function angleFromTopClockwise(dx: number, dy: number): number {
+  const rad = Math.atan2(dx, -dy); // 0 = up, CW positive
+  return ((rad * 180) / Math.PI + 360) % 360;
+}
 
-שלוש בעיות מרכזיות שוברות את הבנייה:
+/** Map a clockwise-from-top angle to the matching presenter pose. */
+export function resolvePoseFromAngle(angle: number): PresenterPoseKey {
+  const norm = ((angle % 360) + 360) % 360;
+  for (const sector of ANGLE_SECTORS) {
+    if (sector.from <= norm && norm < sector.to) return sector.pose;
+  }
+  return "front";
+}
 
-### 1. `orbit.utils.ts` — פונקציות חיוניות נמחקו
-הקובץ הוחלף בגרסה מצומצמת שמכילה רק `normalizeAngle` ו-`getAvatarByAngle`, ומייבאת `AVATAR_SECTORS` שלא קיים. ארבע פונקציות שנמחקו עדיין נדרשות ב-`CircleOrbit.tsx` וב-`InnerPageOrbitHero.tsx`:
-- `angleFromTopClockwise`
-- `buildResolvedPresenterAssets`
-- `preloadImages`
-- `resolveAssetByAngle`
+/* ── presenter asset resolution ── */
 
-### 2. `InnerPageOrbitHero.tsx` — imports שבורים
-הקובץ נמצא ב-`src/components/brand/` אבל מייבא מנתיבים יחסיים כמו `./OrbitTopicButton` — שקיימים רק ב-`src/components/orbit/`.
+const LEGACY_MAP: Record<LegacyAvatarKey, PresenterPoseKey> = {
+  leftMid: "left",
+  leftSide: "upLeft",
+  rightMid: "right",
+  rightSide: "upRight",
+  up: "upRight",
+  down: "downRight",
+};
 
-### 3. `InnerPageOrbitHero.tsx` — הוחלף בטעות עם תוכן של `CircleOrbit`
-הקומפוננטה אמורה להיות **עטיפת הירו** שמקבלת props כמו `eyebrow`, `title[]`, `intro[]`, `heroId`, `support`, `compactLabel`, `floatingMessages`, `reverse`, ומציגה טקסט + אורביט + אופציונלית `CompactPresenterRail`. במקום זה, היא עכשיו עותק של `CircleOrbit` שלא מקבל אף אחד מה-props האלה.
+/**
+ * Accepts a PresenterAssets bag (which may use legacy keys) and returns a
+ * fully-resolved record keyed by every PresenterPoseKey, falling back to
+ * `front` for any missing pose.
+ */
+export function buildResolvedPresenterAssets(
+  raw: PresenterAssets
+): ResolvedPresenterAssets {
+  const result: Partial<Record<PresenterPoseKey, string>> = {
+    front: raw.front,
+  };
 
-6 דפים נשברים: About, Contact, Orchestras, Performances, Students, blog.
+  // Apply legacy mappings first
+  for (const [legacy, pose] of Object.entries(LEGACY_MAP) as [
+    LegacyAvatarKey,
+    PresenterPoseKey,
+  ][]) {
+    if (raw[legacy] && !result[pose]) {
+      result[pose] = raw[legacy];
+    }
+  }
 
----
+  // Apply direct pose keys
+  const POSES: PresenterPoseKey[] = [
+    "front",
+    "upRight",
+    "right",
+    "downRight",
+    "downLeft",
+    "left",
+    "upLeft",
+  ];
 
-## תוכנית תיקון
+  for (const pose of POSES) {
+    if (raw[pose]) result[pose] = raw[pose];
+  }
 
-### שלב 1: שחזור `orbit.utils.ts`
-להחזיר את כל הפונקציות שנמחקו: `angleFromTopClockwise`, `resolvePoseFromAngle`, `buildResolvedPresenterAssets`, `resolveAssetByAngle`, `preloadImages`. להסיר את ה-import השבור של `AVATAR_SECTORS` ולהחזיר את ה-import של `ANGLE_SECTORS` ואת הטיפוסים הנדרשים.
+  // Fill missing poses with front
+  for (const pose of POSES) {
+    if (!result[pose]) result[pose] = raw.front;
+  }
 
-### שלב 2: שכתוב `InnerPageOrbitHero.tsx`
-לבנות מחדש את הקומפוננטה כעטיפת הירו שמשלבת:
-- טקסט (eyebrow, title, intro, support) — בדומה ל-`InnerPageHero`
-- `CircleOrbit` מ-`src/components/orbit/CircleOrbit`
-- `CompactPresenterRail` (כשיש `heroId` ו-`compactLabel`)
+  return result as ResolvedPresenterAssets;
+}
 
-Props שצריך לתמוך בהם (לפי השימוש בכל 6 הדפים):
-`eyebrow`, `title: string[]`, `intro: string[]`, `support?: ReactNode`, `orbitItems`, `presenterAssets`, `activeOrbitId`, `presenterAlt`, `onOrbitItemClick`, `center?: ReactNode`, `reverse?: boolean`, `heroId?: string`, `compactLabel?: string`, `floatingMessages?: FloatingBubbleMessage[]`
+/** Given an angle, resolve which asset + pose to use. */
+export function resolveAssetByAngle(
+  angle: number,
+  resolved: ResolvedPresenterAssets
+): { pose: PresenterPoseKey; src: string } {
+  const pose = resolvePoseFromAngle(angle);
+  return { pose, src: resolved[pose] };
+}
 
-ה-imports יפנו לנתיבים הנכונים: `@/components/orbit/CircleOrbit`, `@/components/orbit/CompactPresenterRail`, `@/components/orbit/orbit.types`.
+/* ── preloading ── */
 
-### שלב 3: אימות
-לוודא שאין שגיאות בנייה נוספות.
-
----
-
-### פרטים טכניים
-
-קבצים לעריכה:
-- `src/components/orbit/orbit.utils.ts` — שחזור 4 פונקציות + תיקון imports
-- `src/components/brand/InnerPageOrbitHero.tsx` — שכתוב מלא כעטיפת הירו
-
-אין צורך לגעת ב-6 דפי הצרכן (About, Contact, Orchestras, Performances, Students, blog) — ה-API שהם משתמשים בו הוא הנכון, רק הקומפוננטה צריכה לתמוך בו.
-
+export function preloadImages(srcs: string[]): void {
+  for (const src of srcs) {
+    const img = new Image();
+    img.src = src;
+  }
+}

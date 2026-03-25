@@ -83,7 +83,7 @@ export default function InnerPageOrbitHero({
       <CircleOrbit
         items={orbitItems}
         presenterAssets={presenterAssets}
-        centerTextureSrc={red3}
+        lightTextureSrc={red3}
         presenterAlt={presenterAlt}
         selectedId={activeOrbitId}
         onItemClick={onOrbitItemClick}
