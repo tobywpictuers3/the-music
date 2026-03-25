@@ -8,6 +8,7 @@ import logoBlack from "@/assets/homepage/brand/logo-black.jpg";
 const NAV_LINKS = [
   { label: "בית", href: "/" },
   { label: "תזמורות", href: "/orchestras" },
+  { label: "הופעות", href: "/performances" },
   { label: "תלמידות", href: "/students" },
   { label: "תווים", href: "/sheets" },
   { label: "אודות", href: "/about" },
@@ -52,12 +53,10 @@ const Header = () => {
     <header className="sticky top-0 z-50 py-3 sm:py-4" dir="rtl">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 pill-nav px-5 sm:px-6">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 min-w-0">
             <img src={currentLogo} alt="Toby Music" className="h-9 sm:h-10 w-auto" />
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
               <Link
@@ -74,7 +73,6 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={toggleTheme}
@@ -92,7 +90,6 @@ const Header = () => {
               <Link to="/contact">צור קשר</Link>
             </Button>
 
-            {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -103,7 +100,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden mt-2 rounded-2xl bg-card border border-border p-4 shadow-soft animate-fade-in">
             <nav className="flex flex-col gap-1">
@@ -122,7 +118,9 @@ const Header = () => {
                 </Link>
               ))}
               <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full w-full mt-2 font-semibold">
-                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>צור קשר</Link>
+                <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
+                  צור קשר
+                </Link>
               </Button>
             </nav>
           </div>
