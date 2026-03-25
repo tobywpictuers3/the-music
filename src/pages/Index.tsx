@@ -41,11 +41,6 @@ import guitarElectric from "@/assets/homepage/characters/eguitar.png";
 import texStarsLight from "@/assets/homepage/textures/stars-light.png";
 import texStarsDark from "@/assets/homepage/textures/stars-dark.png";
 
-/**
- * =========================================================
- * מפת תמונות — דמויות הבמה
- * =========================================================
- */
 const SIGN_CHARACTER_MAP: Record<CharacterKey, string> = {
   piano: signPiano,
   eguitar: signEguitar,
@@ -55,11 +50,6 @@ const SIGN_CHARACTER_MAP: Record<CharacterKey, string> = {
   violin: signViolin,
 };
 
-/**
- * =========================================================
- * מפת תמונות — דמוון
- * =========================================================
- */
 const PRESENTER_MAP: Record<CharacterKey, string> = {
   piano,
   eguitar: guitarElectric,
@@ -69,63 +59,98 @@ const PRESENTER_MAP: Record<CharacterKey, string> = {
   violin,
 };
 
-/**
- * =========================================================
- * הגדרות צל רצפה לכל דמות
- * אפשר לכוון כאן בלי לגעת בלוגיקה
- * =========================================================
- */
 const STAGE_SHADOW_MAP: Record<
   CharacterKey,
   {
-    width: string;
-    height: string;
-    blur: number;
-    opacity: number;
-    bottom: string;
+    floorWidth: string;
+    floorHeight: string;
+    floorBlur: number;
+    floorOpacity: number;
+    floorBottom: string;
+    glowWidth: string;
+    glowHeight: string;
+    glowBottom: string;
+    glowOpacity: number;
+    imageShadow: string;
   }
 > = {
   piano: {
-    width: "44%",
-    height: "8.5%",
-    blur: 16,
-    opacity: 0.24,
-    bottom: "2.3%",
+    floorWidth: "46%",
+    floorHeight: "8.5%",
+    floorBlur: 16,
+    floorOpacity: 0.24,
+    floorBottom: "2.2%",
+    glowWidth: "28%",
+    glowHeight: "5.5%",
+    glowBottom: "3%",
+    glowOpacity: 0.12,
+    imageShadow:
+      "drop-shadow(0 16px 24px rgba(0,0,0,0.20)) drop-shadow(0 6px 10px rgba(76,42,14,0.16))",
   },
   eguitar: {
-    width: "28%",
-    height: "7%",
-    blur: 13,
-    opacity: 0.2,
-    bottom: "2.2%",
+    floorWidth: "29%",
+    floorHeight: "7%",
+    floorBlur: 13,
+    floorOpacity: 0.2,
+    floorBottom: "2.1%",
+    glowWidth: "18%",
+    glowHeight: "4.8%",
+    glowBottom: "2.8%",
+    glowOpacity: 0.11,
+    imageShadow:
+      "drop-shadow(0 14px 22px rgba(0,0,0,0.20)) drop-shadow(0 5px 9px rgba(76,42,14,0.15))",
   },
   guitar: {
-    width: "28%",
-    height: "7%",
-    blur: 13,
-    opacity: 0.2,
-    bottom: "2.2%",
+    floorWidth: "29%",
+    floorHeight: "7%",
+    floorBlur: 13,
+    floorOpacity: 0.2,
+    floorBottom: "2.1%",
+    glowWidth: "18%",
+    glowHeight: "4.8%",
+    glowBottom: "2.8%",
+    glowOpacity: 0.11,
+    imageShadow:
+      "drop-shadow(0 14px 22px rgba(0,0,0,0.20)) drop-shadow(0 5px 9px rgba(76,42,14,0.15))",
   },
   drums: {
-    width: "34%",
-    height: "8%",
-    blur: 15,
-    opacity: 0.22,
-    bottom: "2%",
+    floorWidth: "35%",
+    floorHeight: "8%",
+    floorBlur: 15,
+    floorOpacity: 0.22,
+    floorBottom: "2%",
+    glowWidth: "22%",
+    glowHeight: "5.6%",
+    glowBottom: "2.8%",
+    glowOpacity: 0.11,
+    imageShadow:
+      "drop-shadow(0 16px 26px rgba(0,0,0,0.20)) drop-shadow(0 6px 10px rgba(76,42,14,0.15))",
   },
   saxophone: {
-    width: "24%",
-    height: "6.5%",
-    blur: 12,
-    opacity: 0.2,
-    bottom: "2.2%",
+    floorWidth: "24%",
+    floorHeight: "6.5%",
+    floorBlur: 12,
+    floorOpacity: 0.2,
+    floorBottom: "2.2%",
+    glowWidth: "15%",
+    glowHeight: "4.5%",
+    glowBottom: "2.9%",
+    glowOpacity: 0.1,
+    imageShadow:
+      "drop-shadow(0 14px 22px rgba(0,0,0,0.20)) drop-shadow(0 5px 9px rgba(76,42,14,0.15))",
   },
   violin: {
-    width: "22%",
-    height: "6%",
-    blur: 12,
-    opacity: 0.2,
-    bottom: "2.2%",
+    floorWidth: "22%",
+    floorHeight: "6%",
+    floorBlur: 12,
+    floorOpacity: 0.2,
+    floorBottom: "2.2%",
+    glowWidth: "14%",
+    glowHeight: "4.2%",
+    glowBottom: "2.9%",
+    glowOpacity: 0.1,
+    imageShadow:
+      "drop-shadow(0 14px 22px rgba(0,0,0,0.20)) drop-shadow(0 5px 9px rgba(76,42,14,0.15))",
   },
 };
 
@@ -209,66 +234,46 @@ export default function Index() {
           </div>
         )}
 
-        {/* ======================================================
-            HERO / STAGE
-            במה אחת עם יחס נעול:
-            - רקע
-            - טקסט
-            - דמויות
-            כולם באותו קונטיינר
-        ====================================================== */}
         <section
           ref={heroRef}
           id={HOME_HERO_ID}
           className="relative isolate overflow-hidden"
         >
-          <div className="relative mx-auto max-w-[1600px] px-4 pt-8 md:px-8">
-            {/* 
-              יחס מדויק לפי קבצי הבמה:
-              2048 / 1365
-            */}
+          <div className="relative w-full">
             <div
-              className="relative mx-auto w-full overflow-hidden"
+              className="relative w-full overflow-hidden"
               style={{ aspectRatio: "2048 / 1365" }}
             >
               {/* רקע במה */}
-              <div className="absolute inset-0">
-                <img
-                  src={stageBgLight}
-                  alt=""
-                  className="block h-full w-full object-cover dark:hidden"
-                />
-                <img
-                  src={stageBgDark}
-                  alt=""
-                  className="hidden h-full w-full object-cover dark:block"
-                />
+              <img
+                src={stageBgLight}
+                alt=""
+                className="absolute inset-0 block h-full w-full object-cover dark:hidden"
+              />
+              <img
+                src={stageBgDark}
+                alt=""
+                className="absolute inset-0 hidden h-full w-full object-cover dark:block"
+              />
 
-                {/* מעבר עדין לתוכן שמתחת */}
-                <div className="absolute inset-x-0 bottom-0 h-[16%] bg-gradient-to-b from-transparent to-background/90" />
-              </div>
+              {/* מעבר רך לתוכן שמתחת */}
+              <div className="absolute inset-x-0 bottom-0 z-[1] h-[16%] bg-gradient-to-b from-transparent to-background/90" />
 
-              {/* ==================================================
-                  שכבת טקסט ההירו
-                  בתוך אותה הבמה
-              ================================================== */}
-              <div className="absolute inset-x-0 top-0 z-20 flex h-[42%] flex-col items-center px-4 pt-[4.5%] text-center sm:px-6 md:px-8">
+              {/* טקסט ההירו */}
+              <div className="absolute inset-x-0 top-0 z-20 flex h-[42%] flex-col items-center px-4 pt-[4.2%] text-center sm:px-6 md:px-8">
                 <div className="mx-auto flex w-full max-w-3xl flex-col items-center">
-                  {/* לוגו במצב בהיר */}
                   <img
                     src={logoLight}
                     alt="Toby Music"
                     className="mb-3 h-[clamp(42px,5vw,98px)] object-contain drop-shadow-lg dark:hidden"
                   />
 
-                  {/* לוגו במצב כהה */}
                   <img
                     src={logoDark}
                     alt="Toby Music"
                     className="mb-3 hidden h-[clamp(42px,5vw,98px)] object-contain drop-shadow-lg dark:block"
                   />
 
-                  {/* כותרת */}
                   <h1 className="text-[clamp(24px,4vw,72px)] font-black leading-tight text-foreground drop-shadow-[0_4px_20px_rgba(0,0,0,0.22)]">
                     {HERO_TEXT.subtitle}{" "}
                     <a
@@ -335,12 +340,10 @@ export default function Index() {
                     </a>
                   </h1>
 
-                  {/* שורת תמיכה */}
                   <p className="mt-3 rounded-full bg-foreground/7 px-4 py-2 text-[clamp(11px,1.25vw,22px)] text-foreground/85 backdrop-blur-sm sm:px-6">
                     {HERO_TEXT.supportLine}
                   </p>
 
-                  {/* סלוגן */}
                   <p className="mt-3 text-[clamp(12px,1.45vw,26px)] font-bold text-foreground/90">
                     {HERO_TEXT.sloganPrefix}{" "}
                     <span className="bg-gradient-to-l from-accent via-primary to-accent bg-clip-text text-transparent">
@@ -350,14 +353,8 @@ export default function Index() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  שכבת הדמויות
-                  חשובה מאוד:
-                  - יושבת בתוך הבמה עצמה
-                  - גובה יחסי, לא px
-                  - לכן נשמר יחס עם הרקע
-              ================================================== */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[48%] sm:h-[49%] md:h-[50%] lg:h-[51%]">
+              {/* שכבת דמויות בתוך אותה במה */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[50%]">
                 {STAGE_CHARACTERS.map((char) => {
                   const shadow = STAGE_SHADOW_MAP[char.character];
 
@@ -375,29 +372,29 @@ export default function Index() {
                       aria-label={`מעבר לדף ${char.title}`}
                     >
                       <div className="relative">
-                        {/* צל רצפה רחב */}
+                        {/* צל רצפה */}
                         <div
                           aria-hidden="true"
                           className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-full"
                           style={{
-                            bottom: shadow.bottom,
-                            width: shadow.width,
-                            height: shadow.height,
-                            background: `rgba(25, 16, 8, ${shadow.opacity})`,
-                            filter: `blur(${shadow.blur}px)`,
+                            bottom: shadow.floorBottom,
+                            width: shadow.floorWidth,
+                            height: shadow.floorHeight,
+                            background: `rgba(25, 16, 8, ${shadow.floorOpacity})`,
+                            filter: `blur(${shadow.floorBlur}px)`,
                             zIndex: 0,
                           }}
                         />
 
-                        {/* צל חם קטן יותר, ל"ישיבה" על הבמה */}
+                        {/* זוהר חם עדין */}
                         <div
                           aria-hidden="true"
                           className="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-full"
                           style={{
-                            bottom: "3%",
-                            width: `calc(${shadow.width} * 0.62)`,
-                            height: `calc(${shadow.height} * 0.65)`,
-                            background: "rgba(120, 72, 24, 0.12)",
+                            bottom: shadow.glowBottom,
+                            width: shadow.glowWidth,
+                            height: shadow.glowHeight,
+                            background: `rgba(120, 72, 24, ${shadow.glowOpacity})`,
                             filter: "blur(8px)",
                             zIndex: 0,
                           }}
@@ -409,8 +406,7 @@ export default function Index() {
                           alt={char.title}
                           className="relative z-10 block w-full"
                           style={{
-                            filter:
-                              "drop-shadow(0 16px 24px rgba(0,0,0,0.20)) drop-shadow(0 6px 10px rgba(76,42,14,0.16))",
+                            filter: shadow.imageShadow,
                           }}
                         />
 
