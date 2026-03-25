@@ -1,30 +1,61 @@
-import type { AvatarKey } from "./orbit.types";
+import type { PresenterPoseKey } from "./orbit.types";
 
-export type AvatarSector = {
+export type AngleSector = {
   from: number;
   to: number;
-  avatar: AvatarKey;
+  pose: PresenterPoseKey;
 };
 
 export const ORBIT_SETTINGS = {
-  zoneMaxWidth: 780,
-  zoneHeight: { base: 560, md: 660, lg: 730 },
-  radius: { base: 158, md: 212, lg: 246 },
-  itemSize: { base: 152, md: 194, lg: 220 },
-  spinSeconds: 405,
-  activeScale: 1.035,
+  sizeByVariant: {
+    inner: {
+      zoneMaxWidth: 780,
+      zoneHeight: { base: 560, md: 660, lg: 740 },
+      radius: { base: 168, md: 218, lg: 252 },
+      itemSize: { base: 154, md: 198, lg: 222 },
+      avatarSize: { base: 248, md: 320, lg: 388 },
+      spinSeconds: 420,
+    },
+    home: {
+      zoneMaxWidth: 920,
+      zoneHeight: { base: 620, md: 720, lg: 820 },
+      radius: { base: 192, md: 252, lg: 296 },
+      itemSize: { base: 142, md: 178, lg: 202 },
+      avatarSize: { base: 236, md: 304, lg: 360 },
+      spinSeconds: 360,
+    },
+  },
 
-  avatarSize: { base: 248, md: 320, lg: 380 },
+  activeScale: 1.04,
   avatarFloatSeconds: 10,
   avatarSwitchMs: 120,
+
+  compactRail: {
+    collapsedOffsetPx: 92,
+    expandedOffsetPx: 300,
+    bubbleHoldMs: 2000,
+    bubbleFadeMs: 6000,
+    bubbleLoopMs: 15000,
+  },
 } as const;
 
-export const AVATAR_SECTORS: AvatarSector[] = [
-  { from: 225, to: 270, avatar: "leftSide" },
-  { from: 270, to: 315, avatar: "up" },
-  { from: 315, to: 360, avatar: "rightSide" },
-  { from: 0, to: 55, avatar: "rightMid" },
-  { from: 55, to: 140, avatar: "down" },
-  { from: 140, to: 180, avatar: "leftMid" },
-  { from: 180, to: 225, avatar: "leftSide" },
+/**
+ * זוויות לפי ההגדרה שלך:
+ * 12→2 = מעלה ימין
+ * 2→4 = ימין
+ * 4→6 = מטה ימין
+ * 6→8 = מטה שמאל
+ * 8→10 = שמאל
+ * 10→12 = מעלה שמאל
+ *
+ * כאן 0° הוא "12 בשעון", והכיוון הוא עם כיוון השעון.
+ */
+export const ANGLE_SECTORS: AngleSector[] = [
+  { from: 330, to: 360, pose: "upRight" },
+  { from: 0, to: 30, pose: "upRight" },
+  { from: 30, to: 90, pose: "right" },
+  { from: 90, to: 150, pose: "downRight" },
+  { from: 150, to: 210, pose: "downLeft" },
+  { from: 210, to: 270, pose: "left" },
+  { from: 270, to: 330, pose: "upLeft" },
 ];
