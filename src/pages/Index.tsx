@@ -14,15 +14,12 @@ import {
   type CharacterKey,
 } from "@/config/homepage";
 
-// רקעי במה
 import stageBgLight from "@/assets/homepage/stage/lightstage.png";
 import stageBgDark from "@/assets/homepage/stage/darkstage.png";
 
-// לוגו
 import logoLight from "@/assets/logo-toby.png";
 import logoDark from "@/assets/whitelogo.png";
 
-// דמויות-שלט על הבמה
 import signPiano from "@/assets/homepage/characters-signs/piano.png";
 import signEguitar from "@/assets/homepage/characters-signs/eguitar.png";
 import signGuitar from "@/assets/homepage/characters-signs/guitar.png";
@@ -31,7 +28,6 @@ import signSaxophone from "@/assets/homepage/characters-signs/saxophone.png";
 import signViolin from "@/assets/homepage/characters-signs/violin.png";
 import presenterGuide from "@/assets/homepage/presenter/presenter.png";
 
-// דמויות מגישות למקטע התחתון
 import drums from "@/assets/homepage/characters/drums.png";
 import piano from "@/assets/homepage/characters/piano.png";
 import saxophone from "@/assets/homepage/characters/saxophone.png";
@@ -39,7 +35,6 @@ import violin from "@/assets/homepage/characters/violin.png";
 import guitarClassic from "@/assets/homepage/characters/guitar.png";
 import guitarElectric from "@/assets/homepage/characters/eguitar.png";
 
-// טקסטורות לכרטיסים
 import texStarsLight from "@/assets/homepage/textures/stars-light.png";
 import texStarsDark from "@/assets/homepage/textures/stars-dark.png";
 
