@@ -1,20 +1,3 @@
-/**
- * Homepage configuration
- * ======================
- * זה מקור האמת היחיד של דף הבית.
- *
- * כאן שולטים על:
- * 1) מיפוי דפים ← דמויות
- * 2) מיקומי דמויות על הבמה
- * 3) מיקום הכיתוב בתוך השלט של כל דמות
- * 4) טקסטים כלליים של ההירו והמגיש
- *
- * חשוב:
- * left = נקודת עית של הדמות
- * bottom = גובה הבסיס של הדמות מהרצפה
- * width = גודל הדמות
- */
-
 export const HOME_HERO_ID = "home-hero";
 export const GUIDE_SECTION_ID = "guide-presenter";
 
@@ -133,7 +116,7 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
     labelMode: "overlay",
   },
   {
-    title: "בלוגים",
+    title: "בלוג",
     href: "/blog",
     character: "saxophone",
     stage: {
@@ -194,9 +177,6 @@ export const STAGE_CHARACTERS: StageCharacter[] = [
   },
 ];
 
-/**
- * טקסטים של ההירו
- */
 export const HERO_TEXT = {
   subtitle: "המוזיקה מתחילה",
   linkWord: "כאן",
@@ -206,25 +186,19 @@ export const HERO_TEXT = {
   sloganAccent: "זו יצירה",
 };
 
-/**
- * טקסטים של המגיש
- */
 export const GUIDE_PRESENTER = {
   welcomeText:
     "ברוכים הבאים לאתר של טובי. אני אלווה אתכם כאן בסיור באתר. בלחיצה עלי תוכלו לשאול כל מה שתצטרכו אודות הנכתב באתר, אשתדל לענות לכם ככל יכולתי. ניתן גם לבקש הסבר באופן קולי. לשירותכם!",
   floatingLabel: "שאלו את טובי",
 };
 
-/**
- * תוכן הבאנר הרץ
- */
 export const MARQUEE_ITEMS = [
   "הופעות",
   "תזמורות",
   "תלמידות",
   "תווים",
-  "בלוגים",
-  "יצירת קשר",
+  "בלוג",
+  "צור קשר",
   "מוזיקה • תוכן • חוויה",
   "אירועים • לימוד • השראה",
   "Toby Music",
