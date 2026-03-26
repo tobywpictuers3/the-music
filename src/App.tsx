@@ -21,7 +21,6 @@ import Performances from "./pages/Performances";
 import StudentsDemo from "./pages/StudentsDemo";
 import Blog from "./pages/blog";
 import Sheets from "./pages/sheets";
-import OrbitSystemDemo from "./orbit-system/OrbitSystemDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,7 +50,6 @@ const App = () => (
           <Route path="/performances" element={<Performances />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/sheets" element={<Sheets />} />
-          <Route path="/orbit-demo" element={<OrbitSystemDemo />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
