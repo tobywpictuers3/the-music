@@ -3,6 +3,7 @@
  * - תנועה איטית רציפה
  * - עצירה חלקה בהובר
  * - קביעת הזווית הפעילה של הדמות במרכז
+ * - איפוס הובר בזמן גלילה, כדי שהמעגל לא ייתקע כשחוזרים למעלה
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -68,6 +69,20 @@ export function useOrbitHeroState({
       lastTsRef.current = null;
     };
   }, [rotationSpeedDegPerSec]);
+
+  useEffect(() => {
+    const clearHoverOnScroll = () => {
+      setActiveItemId(null);
+    };
+
+    window.addEventListener("scroll", clearHoverOnScroll, { passive: true });
+    window.addEventListener("resize", clearHoverOnScroll);
+
+    return () => {
+      window.removeEventListener("scroll", clearHoverOnScroll);
+      window.removeEventListener("resize", clearHoverOnScroll);
+    };
+  }, []);
 
   const activeLook = useMemo<PresenterLook>(() => {
     if (!activeItemId) return defaultLook;
