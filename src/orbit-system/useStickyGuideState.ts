@@ -3,6 +3,9 @@
  * - מתי המגיש הקבוע מופיע
  * - מתי הבאנר מופיע
  * - איזו בועה פעילה כרגע
+ *
+ * כאן החישוב הוא מתחילת הגלילה מההירו,
+ * ולא רק אחרי שההירו נגמר.
  */
 
 import { useEffect, useMemo, useState, type RefObject } from "react";
@@ -26,9 +29,9 @@ export function useStickyGuideState({
       const heroEl = heroRef.current;
       if (!heroEl) return;
 
-      const heroEndY = heroEl.offsetTop + heroEl.offsetHeight - headerOffsetPx;
+      const heroStartY = Math.max(heroEl.offsetTop - headerOffsetPx, 0);
       const currentScrollY = window.scrollY;
-      const delta = Math.max(currentScrollY - heroEndY, 0);
+      const delta = Math.max(currentScrollY - heroStartY, 0);
 
       setAfterHeroScrollPx(delta);
     };
@@ -43,7 +46,7 @@ export function useStickyGuideState({
     };
   }, [headerOffsetPx, heroRef]);
 
-  const stickyVisible = afterHeroScrollPx > 0;
+  const stickyVisible = afterHeroScrollPx > 24;
   const bannerVisible = stickyVisible;
 
   const activeBubble = useMemo(() => {
