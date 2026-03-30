@@ -23,31 +23,36 @@ export default function HeroCenterPresenter({
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center"
+      className="pointer-events-none absolute inset-0 z-30"
       aria-hidden="true"
     >
-      <div
-        className="relative"
-        style={{
-          width: presenter.sizing.heroWidth,
-          maxWidth: presenter.sizing.heroMaxWidth,
-          aspectRatio: "1 / 1.25",
-        }}
-      >
-        {HERO_LOOKS.map((look) => (
-          <img
-            key={look}
-            src={presenter.looks[look].src}
-            alt={presenter.looks[look].alt}
-            loading="eager"
-            decoding="sync"
-            className="absolute inset-0 h-full w-full object-contain transition-opacity duration-150 ease-out"
-            style={{
-              opacity: visibleLook === look ? 1 : 0,
-              willChange: "opacity",
-            }}
-          />
-        ))}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[46%]">
+        <div
+          className="relative"
+          style={{
+            width: `min(${presenter.sizing.heroMaxWidth}, clamp(170px, 22vw, 260px))`,
+            aspectRatio: "0.86 / 1.2",
+          }}
+        >
+          <div className="absolute inset-x-[16%] bottom-[10%] h-[16%] rounded-full bg-black/28 blur-2xl" />
+          <div className="absolute inset-[8%] rounded-full bg-white/5 blur-2xl" />
+
+          {HERO_LOOKS.map((look) => (
+            <img
+              key={look}
+              src={presenter.looks[look].src}
+              alt={presenter.looks[look].alt}
+              loading="eager"
+              decoding="sync"
+              className="absolute inset-0 h-full w-full object-contain transition-opacity duration-150 ease-out"
+              style={{
+                opacity: visibleLook === look ? 1 : 0,
+                willChange: "opacity",
+                filter: "drop-shadow(0 14px 28px rgba(0,0,0,0.24))",
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
