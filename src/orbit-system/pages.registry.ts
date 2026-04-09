@@ -373,6 +373,97 @@ basePages.orchestras = {
   },
 };
 
+basePages.performances = {
+  pageId: "performances",
+  route: "/performances",
+  presenterId: "violin",
+  hero: {
+    titleLines: ["לא רק לוח זמנים", "אלא מסלול", "להזמנת הופעה"],
+    introLines: [
+      "כאן אפשר לקבל מבט על עולם ההופעות, להבין איזה מסלול יכול להתאים לאירוע, ולפתוח שיחה מסודרת.",
+      "המטרה היא לחבר בין חוויה מוזיקלית לבין בהירות: מה מתאים, מה שואלים, ואיך ממשיכים.",
+    ],
+    headerOffsetPx: 96,
+  },
+  orbit: {
+    items: [
+      {
+        id: "1",
+        label: "סקירה",
+        baseAngleDeg: 270,
+        targetSectionId: "performances-overview-section",
+      },
+      {
+        id: "2",
+        label: "מסלולים",
+        baseAngleDeg: 338,
+        targetSectionId: "performances-packages-section",
+      },
+      {
+        id: "3",
+        label: "יומן",
+        baseAngleDeg: 52,
+        targetSectionId: "performances-calendar-section",
+      },
+      {
+        id: "4",
+        label: "שאלות",
+        baseAngleDeg: 126,
+        targetSectionId: "performances-faq-section",
+      },
+      {
+        id: "5",
+        label: "קשר",
+        baseAngleDeg: 202,
+        targetSectionId: "performances-contact-section",
+      },
+    ],
+    rotationSpeedDegPerSec: 1.05,
+    defaultLook: "default",
+  },
+  stickyGuide: {
+    idleLook: "default",
+    bubbles: [
+      {
+        id: "performances-bubble-1",
+        text: "דף ההופעות כאן נועד לעשות סדר: לא רק להראות שיש הופעות, אלא לעזור להבין איזה כיוון מתאים לאירוע ואיך ניגשים לזה.",
+        showFromAfterHeroPx: 40,
+        hideAfterHeroPx: 760,
+        maxWidthPx: 580,
+        offsetX: 18,
+        offsetY: -6,
+        enterMs: 240,
+        exitMs: 180,
+      },
+      {
+        id: "performances-bubble-2",
+        text: "אחרי הסקירה מגיעים למסלולים, ליומן, ולשאלות החשובות לפני פנייה — כך שהקשר נפתח ממקום הרבה יותר ברור.",
+        showFromAfterHeroPx: 900,
+        hideAfterHeroPx: 1900,
+        maxWidthPx: 620,
+        offsetX: 22,
+        offsetY: 2,
+        enterMs: 240,
+        exitMs: 180,
+      },
+    ],
+  },
+  tickerBanner: {
+    enabled: true,
+    items: [
+      "מסלולי הופעה",
+      "יומן אירועים",
+      "שאלות נפוצות",
+      "פנייה מסודרת",
+      "התאמה לאירוע",
+    ],
+    heightPx: 96,
+    bottomOffsetPx: 34,
+    opacity: 0.92,
+    loopDurationSec: 38,
+  },
+};
+
 export const pagesRegistry: Record<PageId, PageConfig> = basePages;
 
 /**
