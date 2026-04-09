@@ -1,11 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import InnerPageLayout from "@/components/InnerPageLayout";
-import InnerPageOrbitHero from "@/components/brand/InnerPageOrbitHero";
+import OrbitPageShell from "@/orbit-system/OrbitPageShell";
+import type { OrbitItemConfig } from "@/orbit-system/orbit.types";
 import AppearOnScroll from "@/components/AppearOnScroll";
-import {
-  orchestrasOrbitItems,
-  orchestrasPresenterAssets,
-} from "@/content/orbit/orchestrasOrbit";
 import {
   Calendar,
   MapPin,
@@ -506,304 +503,199 @@ const BudgetCalculator = () => {
 };
 
 export default function Orchestras() {
-  const [activeOrbitId, setActiveOrbitId] = useState("overview");
   const [pricingMode, setPricingMode] = useState<"quote" | "budget">("quote");
 
-  function handleOrbitClick(id: string, sectionId?: string) {
-    if (id === "quote") setPricingMode("quote");
-    if (id === "budget") setPricingMode("budget");
-    setActiveOrbitId(id);
-
-    const el = document.getElementById(sectionId ?? "");
+  function scrollToSection(sectionId?: string) {
+    if (!sectionId) return;
+    const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 
-  useEffect(() => {
-    const sectionMap = [
-      { id: "overview", sectionId: "overview-section" },
-      { id: pricingMode === "budget" ? "budget" : "quote", sectionId: "pricing-section" },
-      { id: "events", sectionId: "events-section" },
-      { id: "contact", sectionId: "contact-section" },
-    ];
-
-    const elements = sectionMap
-      .map((item) => {
-        const el = document.getElementById(item.sectionId);
-        return el ? { item, el } : null;
-      })
-      .filter(Boolean) as Array<{ item: { id: string; sectionId: string }; el: HTMLElement }>;
-
-    if (!elements.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-
-        if (!visible) return;
-
-        const matched = elements.find(({ el }) => el === visible.target);
-        if (matched) {
-          setActiveOrbitId(matched.item.id);
-        }
-      },
-      {
-        threshold: [0.15, 0.35, 0.6],
-        rootMargin: "-28% 0px -42% 0px",
-      }
-    );
-
-    elements.forEach(({ el }) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [pricingMode]);
-
-  const heroSupportBlock = (
-    <div className="pt-2">
-      <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-card/75 px-4 py-3 ring-1 ring-border shadow-sm">
-        <Sparkles className="h-5 w-5 text-primary" />
-        <span className="text-sm font-medium md:text-base">
-          כאן אפשר לבנות הצעת מחיר, להכניס תקציב, ולראות הופעות קרובות — באותה שפה
-          של דפי הפנים.
-        </span>
-      </div>
-
-      <div className="mt-7 flex flex-wrap gap-3">
-        <Button
-          size="lg"
-          className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base"
-          onClick={() => handleOrbitClick("quote", "pricing-section")}
-        >
-          לבניית הצעת מחיר
-        </Button>
-
-        <Button
-          variant="secondary"
-          size="lg"
-          className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base"
-          onClick={() => handleOrbitClick("events", "events-section")}
-        >
-          ליומן ההופעות
-        </Button>
-      </div>
-    </div>
-  );
-
-  const centerBadge = (
-    <div className="flex h-[220px] w-[220px] flex-col items-center justify-center rounded-full border border-primary/20 bg-background/70 px-6 text-center shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm md:h-[280px] md:w-[280px]">
-      <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15 md:h-16 md:w-16">
-        <Sparkles className="h-7 w-7 text-primary md:h-8 md:w-8" />
-      </span>
-
-      <div className="mt-4 text-2xl font-bold leading-tight md:text-3xl">
-        תזמורות
-      </div>
-
-      <div className="mt-2 text-sm leading-6 text-muted-foreground md:text-base">
-        הצעת מחיר,
-        <br />
-        תקציב והופעות
-      </div>
-    </div>
-  );
+  function handleOrbitItemClick(item: OrbitItemConfig) {
+    if (item.id === "2") setPricingMode("quote");
+    if (item.id === "3") setPricingMode("budget");
+    scrollToSection(item.targetSectionId);
+  }
 
   return (
     <InnerPageLayout
-      title="הופעות"
-      description="בואו להתרגש מהמוזיקה שלנו! כאן תמצאו את לוח ההופעות הקרובות וגם תוכלו לקבל הצעת מחיר מותאמת אישית."
+      title="תזמורות"
+      description="כאן אפשר להבין מה מתאים לך, לבנות הצעת מחיר, לבדוק תקציב, ולראות הופעות קרובות."
     >
-      <div dir="rtl">
-        <InnerPageOrbitHero
-          eyebrow="תזמורות"
-          title={["לא רק מחיר,", "אלא מסלול", "להזמנת הופעה"]}
-          intro={[
-            "כאן אפשר להבין מה מתאים לך, לבנות הצעת מחיר, לבדוק תקציב, ולראות הופעות קרובות.",
-            "הדף הזה מחבר בין בחירה מעשית לבין חוויית דף ברורה, עם ניווט מעגלי כמו בשאר האתר.",
-          ]}
-          support={heroSupportBlock}
-          orbitItems={orchestrasOrbitItems}
-          presenterAssets={orchestrasPresenterAssets}
-          activeOrbitId={activeOrbitId}
-          presenterAlt="מגישת דף התזמורות"
-          onOrbitItemClick={(item) => handleOrbitClick(item.id, item.sectionId)}
-          center={centerBadge}
-        />
-
-        <section
-          id="overview-section"
-          className="scroll-mt-28 py-12 md:py-16"
-          onMouseEnter={() => setActiveOrbitId("overview")}
-        >
-          <div className="mx-auto grid max-w-5xl gap-5 px-6 md:grid-cols-3">
-            {[
-              {
-                title: "התאמה חכמה",
-                text: "אפשר לבחור חבילה, להוסיף תוסנות הצעה מדויקת לצורך שלך.",
-              },
-              {
-                title: "מסלול לפי תקציב",
-                text: "גם אם עוד אין החלטה — התקציב שלך יכול להפוך להמלצה ברורה.",
-              },
-              {
-                title: "מבט קדימה",
-                text: "לצד ההזמנה עצמה, הדף כולל גם יומן הופעות והמשך קשר מסודר.",
-              },
-            ].map((card) => (
-              <AppearOnScroll key={card.title} delay={0}>
-                <div className="rounded-3xl border border-border bg-card/70 p-6 shadow-soft backdrop-blur-sm">
-                  <div className="text-xl font-bold">{card.title}</div>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-                    {card.text}
-                  </p>
-                </div>
-              </AppearOnScroll>
-            ))}
-          </div>
-        </section>
-
-        <section
-          id="pricing-section"
-          className="scroll-mt-28 bg-muted/30 py-12 md:py-16"
-          onMouseEnter={() =>
-            setActiveOrbitId(pricingMode === "budget" ? "budget" : "quote")
-          }
-        >
-          <div className="mx-auto max-w-5xl px-6">
-            <AppearOnScroll delay={0}>
-              <div className="mb-10 text-center">
-                <h2 className="mb-3 font-serif text-2xl font-bold tracking-tight md:text-3xl">
-                  הזמיני הופעה
-                </h2>
-                <p className="mx-auto max-w-2xl text-base text-muted-foreground">
-                  בחרי את המסלול המתאים לך — בנה הצעת מחיר מותאמת או הזיני תקציב ונמליץ
-                  לך על האופציות הטובות ביותר.
-                </p>
-              </div>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={100}>
-              <Tabs
-                value={pricingMode}
-                onValueChange={(value) => {
-                  const next = value as "quote" | "budget";
-                  setPricingMode(next);
-                  setActiveOrbitId(next);
-                }}
-                className="w-full"
-                dir="rtl"
-              >
-                <TabsList className="mx-auto mb-10 grid w-full max-w-md grid-cols-2">
-                  <TabsTrigger value="quote" className="py-2.5 text-sm">
-                    <FileText className="ml-2 h-4 w-4" />
-                    בניית הצעת מחיר
-                  </TabsTrigger>
-                  <TabsTrigger value="budget" className="py-2.5 text-sm">
-                    <Calculator className="ml-2 h-4 w-4" />
-                    יש לי תקציב
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="quote">
-                  <QuoteBuilder />
-                </TabsContent>
-
-                <TabsContent value="budget">
-                  <BudgetCalculator />
-                </TabsContent>
-              </Tabs>
-            </AppearOnScroll>
-          </div>
-        </section>
-
-        <section
-          id="events-section"
-          className="scroll-mt-28 py-12 md:py-16"
-          onMouseEnter={() => setActiveOrbitId("events")}
-        >
-          <div className="mx-auto max-w-5xl px-6">
-            <AppearOnScroll delay={0}>
-              <h2 className="mb-10 text-center font-serif text-2xl font-bold tracking-tight md:text-3xl">
-                הופעות קרובות
-              </h2>
-            </AppearOnScroll>
-
-            <div className="space-y-5">
-              {upcomingEvents.map((event, index) => (
-                <AppearOnScroll key={index} delay={index * 100}>
-                  <div className="flex flex-col items-start gap-5 rounded-xl border border-border bg-card p-6 shadow-sm md:flex-row">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                      <Calendar className="h-8 w-8 text-primary" />
-                    </div>
-
-                    <div className="flex-1">
-                      <h3 className="mb-1 text-xl font-bold">{event.title}</h3>
-                      <p className="mb-3 text-sm text-muted-foreground">
-                        {event.description}
-                      </p>
-
-                      <div className="flex flex-wrap gap-5">
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <Calendar className="h-3.5 w-3.5 text-primary" />
-                          <span>{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <Clock className="h-3.5 w-3.5 text-primary" />
-                          <span>{event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <MapPin className="h-3.5 w-3.5 text-primary" />
-                          <span>{event.location}</span>
-                        </div>
-                      </div>
-                    </div>
+      <OrbitPageShell pageId="orchestras" onOrbitItemClick={handleOrbitItemClick}>
+        <div dir="rtl">
+          <section
+            id="overview-section"
+            className="scroll-mt-28 py-12 md:py-16"
+          >
+            <div className="mx-auto grid max-w-5xl gap-5 px-6 md:grid-cols-3">
+              {[
+                {
+                  title: "התאמה חכמה",
+                  text: "אפשר לבחור חבילה, להוסיף תוספות, ולבנות הצעה מדויקת לצורך שלך.",
+                },
+                {
+                  title: "מסלול לפי תקציב",
+                  text: "גם אם עוד אין החלטה — התקציב שלך יכול להפוך להמלצה ברורה.",
+                },
+                {
+                  title: "מבט קדימה",
+                  text: "לצד ההזמנה עצמה, הדף כולל גם יומן הופעות והמשך קשר מסודר.",
+                },
+              ].map((card) => (
+                <AppearOnScroll key={card.title} delay={0}>
+                  <div className="rounded-3xl border border-border bg-card/70 p-6 shadow-soft backdrop-blur-sm">
+                    <div className="text-xl font-bold">{card.title}</div>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+                      {card.text}
+                    </p>
                   </div>
                 </AppearOnScroll>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
 
-        <section
-          id="contact-section"
-          className="scroll-mt-28 pb-20 pt-4"
-          onMouseEnter={() => setActiveOrbitId("contact")}
-        >
-          <div className="mx-auto max-w-4xl px-6">
-            <div className="rounded-[2rem] border border-border bg-card/70 px-6 py-8 shadow-soft backdrop-blur-sm md:px-10 md:py-10">
-              <div className="text-center">
-                <div className="text-2xl font-bold leading-tight md:text-4xl">
-                  רוצה להמשיך מכאן?
+          <section
+            id="pricing-section"
+            className="scroll-mt-28 bg-muted/30 py-12 md:py-16"
+          >
+            <div className="mx-auto max-w-5xl px-6">
+              <AppearOnScroll delay={0}>
+                <div className="mb-10 text-center">
+                  <h2 className="mb-3 font-serif text-2xl font-bold tracking-tight md:text-3xl">
+                    הזמיני הופעה
+                  </h2>
+                  <p className="mx-auto max-w-2xl text-base text-muted-foreground">
+                    בחרי את המסלול המתאים לך — בנה הצעת מחיר מותאמת או הזיני תקציב ונמליץ
+                    לך על האופציות הטובות ביותר.
+                  </p>
                 </div>
+              </AppearOnScroll>
 
-                <div className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-lg">
-                  אפשר להשאיר פרטים, להתקדם להזמנה, או לחזור שוב להצעת המחיר ולתקציב.
-                </div>
+              <AppearOnScroll delay={100}>
+                <Tabs
+                  value={pricingMode}
+                  onValueChange={(value) => {
+                    const next = value as "quote" | "budget";
+                    setPricingMode(next);
+                  }}
+                  className="w-full"
+                  dir="rtl"
+                >
+                  <TabsList className="mx-auto mb-10 grid w-full max-w-md grid-cols-2">
+                    <TabsTrigger value="quote" className="py-2.5 text-sm">
+                      <FileText className="ml-2 h-4 w-4" />
+                      בניית הצעת מחיר
+                    </TabsTrigger>
+                    <TabsTrigger value="budget" className="py-2.5 text-sm">
+                      <Calculator className="ml-2 h-4 w-4" />
+                      יש לי תקציב
+                    </TabsTrigger>
+                  </TabsList>
 
-                <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                  <Button
-                    size="lg"
-                    className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base"
-                    asChild
-                  >
-                    <a href="/contact">ליצירת קשר</a>
-                  </Button>
+                  <TabsContent value="quote">
+                    <QuoteBuilder />
+                  </TabsContent>
 
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base"
-                    onClick={() => handleOrbitClick("quote", "pricing-section")}
-                  >
-                    חזרה להצעת מחיר
-                  </Button>
+                  <TabsContent value="budget">
+                    <BudgetCalculator />
+                  </TabsContent>
+                </Tabs>
+              </AppearOnScroll>
+            </div>
+          </section>
+
+          <section
+            id="events-section"
+            className="scroll-mt-28 py-12 md:py-16"
+          >
+            <div className="mx-auto max-w-5xl px-6">
+              <AppearOnScroll delay={0}>
+                <h2 className="mb-10 text-center font-serif text-2xl font-bold tracking-tight md:text-3xl">
+                  הופעות קרובות
+                </h2>
+              </AppearOnScroll>
+
+              <div className="space-y-5">
+                {upcomingEvents.map((event, index) => (
+                  <AppearOnScroll key={index} delay={index * 100}>
+                    <div className="flex flex-col items-start gap-5 rounded-xl border border-border bg-card p-6 shadow-sm md:flex-row">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <Calendar className="h-8 w-8 text-primary" />
+                      </div>
+
+                      <div className="flex-1">
+                        <h3 className="mb-1 text-xl font-bold">{event.title}</h3>
+                        <p className="mb-3 text-sm text-muted-foreground">
+                          {event.description}
+                        </p>
+
+                        <div className="flex flex-wrap gap-5">
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <Calendar className="h-3.5 w-3.5 text-primary" />
+                            <span>{event.date}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <Clock className="h-3.5 w-3.5 text-primary" />
+                            <span>{event.time}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm">
+                            <MapPin className="h-3.5 w-3.5 text-primary" />
+                            <span>{event.location}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </AppearOnScroll>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section
+            id="contact-section"
+            className="scroll-mt-28 pb-20 pt-4"
+          >
+            <div className="mx-auto max-w-4xl px-6">
+              <div className="rounded-[2rem] border border-border bg-card/70 px-6 py-8 shadow-soft backdrop-blur-sm md:px-10 md:py-10">
+                <div className="text-center">
+                  <div className="text-2xl font-bold leading-tight md:text-4xl">
+                    רוצה להמשיך מכאן?
+                  </div>
+
+                  <div className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-lg">
+                    אפשר להשאיר פרטים, להתקדם להזמנה, או לחזור שוב להצעת המחיר ולתקציב.
+                  </div>
+
+                  <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                    <Button
+                      size="lg"
+                      className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base"
+                      asChild
+                    >
+                      <a href="/contact">ליצירת קשר</a>
+                    </Button>
+
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base"
+                      onClick={() => {
+                        setPricingMode("quote");
+                        scrollToSection("pricing-section");
+                      }}
+                    >
+                      חזרה להצעת מחיר
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      </OrbitPageShell>
     </InnerPageLayout>
   );
 }
