@@ -50,19 +50,19 @@ const Header = () => {
   const currentLogo = isDark ? whitelogo : logoBlack;
 
   return (
-    <header className="sticky top-0 z-50 py-3 sm:py-4" dir="rtl">
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16 pill-nav px-5 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 min-w-0">
-            <img src={currentLogo} alt="Toby Music" className="h-9 sm:h-10 w-auto" />
+    <header className="fixed inset-x-0 top-0 z-50 py-3 sm:py-4" dir="rtl">
+      <div className="mx-auto max-w-6xl px-3 sm:px-6 lg:px-8">
+        <div className="pill-nav flex h-14 items-center justify-between px-5 sm:h-16 sm:px-6">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <img src={currentLogo} alt="Toby Music" className="h-9 w-auto sm:h-10" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-sm font-medium rounded-full px-4 py-2 transition-all ${
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
                   isActive(link.href)
                     ? "bg-primary/15 text-primary"
                     : "hover:bg-primary/10 hover:text-primary"
@@ -73,25 +73,28 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full hover:bg-primary/10 transition-all"
+              className="rounded-full p-2 transition-all hover:bg-primary/10"
               aria-label="החלף ערכת נושא"
             >
               {isDark ? (
-                <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <Sun className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
               ) : (
                 <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
             </button>
 
-            <Button asChild className="hidden md:flex bg-accent hover:bg-accent/90 text-accent-foreground rounded-full px-6 py-2 hover:scale-105 transition-all text-sm font-semibold">
+            <Button
+              asChild
+              className="hidden rounded-full bg-accent px-6 py-2 text-sm font-semibold text-accent-foreground transition-all hover:scale-105 hover:bg-accent/90 md:flex"
+            >
               <Link to="/contact">צור קשר</Link>
             </Button>
 
             <button
-              className="md:hidden p-2"
+              className="p-2 md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="תפריט"
             >
@@ -101,13 +104,13 @@ const Header = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden mt-2 rounded-2xl bg-card border border-border p-4 shadow-soft animate-fade-in">
+          <div className="mt-2 animate-fade-in rounded-2xl border border-border bg-card p-4 shadow-soft md:hidden">
             <nav className="flex flex-col gap-1">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`text-sm font-medium rounded-lg px-4 py-3 transition-colors ${
+                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                     isActive(link.href)
                       ? "bg-primary/15 text-primary"
                       : "hover:bg-primary/10"
@@ -117,7 +120,10 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
-              <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full w-full mt-2 font-semibold">
+              <Button
+                asChild
+                className="mt-2 w-full rounded-full bg-accent font-semibold text-accent-foreground hover:bg-accent/90"
+              >
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
                   צור קשר
                 </Link>
