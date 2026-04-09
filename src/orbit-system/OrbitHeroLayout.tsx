@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode, RefObject } from "react";
+import { useEffect, useMemo, type CSSProperties, type ReactNode, type RefObject } from "react";
 import stageBgLight from "@/assets/orbit-system/stage/light/stage-bg.webp";
 import stageBgDark from "@/assets/orbit-system/stage/dark/stage-bg.webp";
 import HeroCenterPresenter from "./HeroCenterPresenter";
@@ -66,6 +66,17 @@ export default function OrbitHeroLayout({
   const titleColorsLight = ["#8f5d18", "#2a1a0f", "#bf8330"];
   const titleColors = themeMode === "dark" ? titleColorsDark : titleColorsLight;
 
+  const currentStageBg = useMemo(
+    () => (themeMode === "dark" ? stageBgDark : stageBgLight),
+    [themeMode]
+  );
+
+  useEffect(() => {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = themeMode === "dark" ? stageBgLight : stageBgDark;
+  }, [themeMode]);
+
   return (
     <section
       ref={heroRef}
@@ -79,26 +90,14 @@ export default function OrbitHeroLayout({
         }}
       >
         <img
-          src={stageBgLight}
+          key={themeMode}
+          src={currentStageBg}
           alt=""
           aria-hidden="true"
           fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover object-center select-none"
-          style={{
-            opacity: themeMode === "light" ? 1 : 0,
-            transition: "opacity 700ms ease",
-          }}
-        />
-        <img
-          src={stageBgDark}
-          alt=""
-          aria-hidden="true"
-          fetchPriority="high"
-          className="absolute inset-0 h-full w-full object-cover object-center select-none"
-          style={{
-            opacity: themeMode === "dark" ? 1 : 0,
-            transition: "opacity 700ms ease",
-          }}
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-center select-none transition-opacity duration-500"
         />
       </div>
 
