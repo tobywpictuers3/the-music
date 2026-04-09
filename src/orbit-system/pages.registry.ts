@@ -1,7 +1,7 @@
 /**
- * מקור האמת של כל דפי הדמו.
+ * מקור האמת של דפי האורביט.
  * כאן מוגדרים:
- * - טקסטי הירו
+ * - טקסטי ההירו
  * - 5 העיגולים
  * - מהירות הסיבוב
  * - הבועות של המגיש הקבוע
@@ -88,7 +88,7 @@ const basePages: Record<PageId, PageConfig> = {
   home: createBasePage("home", "/", "avatar"),
   contact: createBasePage("contact", "/contact", "avatar"),
   students: createBasePage("students", "/students", "piano"),
-  blogs: createBasePage("blogs", "/blogs", "saxophone"),
+  blog: createBasePage("blog", "/blog", "avatar"),
   orchestras: createBasePage("orchestras", "/orchestras", "drums"),
   performances: createBasePage("performances", "/performances", "violin"),
   about: createBasePage("about", "/about", "electricGuitar"),
@@ -143,6 +143,97 @@ basePages.about = {
       "כאן יוגדר תוכן שונה לכל דף",
       "הבאנר מופיע יחד עם המגיש הקבוע",
       "הגלילה מההירו מפעילה את המערכת מיד",
+    ],
+    heightPx: 96,
+    bottomOffsetPx: 34,
+    opacity: 0.92,
+    loopDurationSec: 36,
+  },
+};
+
+basePages.blog = {
+  pageId: "blog",
+  route: "/blog",
+  presenterId: "avatar",
+  hero: {
+    titleLines: ["במה חיה", "לתוכן, שאלות,", "וקשר עם הקוראות"],
+    introLines: [
+      "במקום בלוג שבלוני — דף שנכנסים אליו כמו למסלול.",
+      "יש כאן מאמרים, שאלות קצרות, קולות מהקהילה, ורעיונות שנולדים מהשיח עם הקוראות.",
+    ],
+    headerOffsetPx: 96,
+  },
+  orbit: {
+    items: [
+      {
+        id: "1",
+        label: "מוביל",
+        baseAngleDeg: 270,
+        targetSectionId: "featured",
+      },
+      {
+        id: "2",
+        label: "מאמרים",
+        baseAngleDeg: 338,
+        targetSectionId: "articles",
+      },
+      {
+        id: "3",
+        label: "שאלות",
+        baseAngleDeg: 52,
+        targetSectionId: "quick-questions",
+      },
+      {
+        id: "4",
+        label: "קהילה",
+        baseAngleDeg: 126,
+        targetSectionId: "community",
+      },
+      {
+        id: "5",
+        label: "נושאים",
+        baseAngleDeg: 202,
+        targetSectionId: "requested-topics",
+      },
+    ],
+    rotationSpeedDegPerSec: 1.05,
+    defaultLook: "default",
+  },
+  stickyGuide: {
+    idleLook: "default",
+    bubbles: [
+      {
+        id: "blog-bubble-1",
+        text: "כאן הבלוג לא נפתח כפיד שטוח, אלא כשער כניסה: קודם במה, אחר כך מסלול קריאה ברור.",
+        showFromAfterHeroPx: 40,
+        hideAfterHeroPx: 760,
+        maxWidthPx: 560,
+        offsetX: 18,
+        offsetY: -6,
+        enterMs: 240,
+        exitMs: 180,
+      },
+      {
+        id: "blog-bubble-2",
+        text: "בהמשך הדף השאלות, הקהילה והנושאים המבוקשים ממשיכים את המאמרים, ולא יושבים בצד כאזור נפרד.",
+        showFromAfterHeroPx: 920,
+        hideAfterHeroPx: 1900,
+        maxWidthPx: 610,
+        offsetX: 22,
+        offsetY: 2,
+        enterMs: 240,
+        exitMs: 180,
+      },
+    ],
+  },
+  tickerBanner: {
+    enabled: true,
+    items: [
+      "מאמרים חדשים",
+      "שאלות קצרות",
+      "קולות מהקהילה",
+      "נושאים שביקשו שאכתוב",
+      "רשימת התפוצה",
     ],
     heightPx: 96,
     bottomOffsetPx: 34,
