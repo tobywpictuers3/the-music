@@ -6,6 +6,7 @@ import OrbitWheel from "./OrbitWheel";
 import { useOrbitHeroState } from "./useOrbitHeroState";
 import type {
   OrbitItemConfig,
+  OrbitItemId,
   PageConfig,
   PresenterConfig,
   ThemeMode,
@@ -18,6 +19,7 @@ type OrbitHeroLayoutProps = {
   heroRef: RefObject<HTMLElement | null>;
   headerOverlay?: ReactNode;
   onOrbitItemClick?: (item: OrbitItemConfig) => void;
+  controlledActiveItemId?: OrbitItemId | null;
 };
 
 export default function OrbitHeroLayout({
@@ -27,6 +29,7 @@ export default function OrbitHeroLayout({
   heroRef,
   headerOverlay,
   onOrbitItemClick,
+  controlledActiveItemId,
 }: OrbitHeroLayoutProps) {
   const {
     rotationDeg,
@@ -38,6 +41,7 @@ export default function OrbitHeroLayout({
     items: page.orbit.items,
     rotationSpeedDegPerSec: page.orbit.rotationSpeedDegPerSec,
     defaultLook: page.orbit.defaultLook,
+    controlledActiveItemId,
   });
 
   function handleItemClick(item: OrbitItemConfig) {
