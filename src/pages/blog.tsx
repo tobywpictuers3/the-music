@@ -2,15 +2,12 @@ import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import InnerPageLayout from "@/components/InnerPageLayout";
-import InnerPageOrbitHero from "@/components/brand/InnerPageOrbitHero";
 import Section from "@/components/Section";
 import ArticlePreview from "@/components/ArticlePreview";
-
 import NewsletterSignupForm from "@/components/newsletter/NewsletterSignupForm";
-import {
-  blogOrbitItems,
-  blogPresenterAssets,
-} from "@/content/orbit/blogOrbit";
+
+import OrbitPageShell from "@/orbit-system/OrbitPageShell";
+import { pagesRegistry } from "@/orbit-system/pages.registry";
 
 import blog1 from "@/assets/blog-1.avif";
 import blog2 from "@/assets/blog-2.avif";
@@ -53,15 +50,21 @@ type SubscriberTeaser = {
   teaser: string;
 };
 
+function articleHref(slug: string) {
+  return `/article/${slug}`;
+}
+
 const Blog = () => {
   const animatedRef = useRef<(HTMLElement | null)[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("הכל");
-  const [activeOrbitId, setActiveOrbitId] = useState<string>("featured");
+  const [activeSectionId, setActiveSectionId] = useState<string>("featured");
 
   const [isSubscriber] = useState<boolean>(false);
 
   const [qaQuestion, setQaQuestion] = useState("");
   const [topic, setTopic] = useState("");
+
+  const orbitNavItems = pagesRegistry.blog.orbit.items;
 
   const newsletterIssues: NewsletterIssue[] = useMemo(
     () => [
@@ -85,7 +88,7 @@ const Blog = () => {
         slug: "newsletter-tips",
       },
     ],
-    [],
+    []
   );
 
   const latestNewsletter = newsletterIssues[0];
@@ -115,7 +118,7 @@ const Blog = () => {
         slug: "before-stage",
       },
     ],
-    [],
+    []
   );
 
   const allArticles = useMemo(
@@ -163,7 +166,7 @@ const Blog = () => {
         slug: "good-enough-is-pro",
       },
     ],
-    [],
+    []
   );
 
   const communityVoices: CommunityVoice[] = useMemo(
@@ -193,7 +196,7 @@ const Blog = () => {
         slug: "ship-without-burnout",
       },
     ],
-    [],
+    []
   );
 
   const requestedTopicsBoard: RequestedTopic[] = useMemo(
@@ -202,7 +205,7 @@ const Blog = () => {
       { title: "איך להכין הופעה בלי להישחק", status: "in-progress" },
       { title: "מה עושים עם בלוק יצירתי", status: "published" },
     ],
-    [],
+    []
   );
 
   const subscriberTeasers: SubscriberTeaser[] = useMemo(
@@ -213,33 +216,48 @@ const Blog = () => {
       },
       {
         title: "מאחורי הקלעים של בחירת נושאים",
-        teaser: "איך אני מחליטה אילו שאלות נשארות Q&A ואילו הופכות למאמר מלא.",
+        teaser:
+          "איך אני מחליטה אילו שאלות נשארות Q&A ואילו הופכות למאמר מלא.",
       },
       {
         title: "רשימת קריאה קטנה לחודש הקרוב",
-        teaser: "המלצות, כיווני חשיבה, ותזכורות קטנות שלא נכנסות לפיד הציבורי.",
+        teaser:
+          "המלצות, כיווני חשיבה, ותזכורות קטנות שלא נכנסות לפיד הציבורי.",
       },
     ],
-    [],
+    []
   );
 
   const categories = useMemo(
     () => ["הכל", "תרגול", "במה", "תהליך", "יצירה", "למידה"],
-    [],
+    []
   );
 
   const topicSuggestions: TopicSuggestion[] = useMemo(
     () => [
-      { title: "איך בונים תוכנית תרגול שבועית?", hint: "דוגמה למסגרת שעובדת בפועל." },
-      { title: "מה עושים כשיש 'בלוק' יצירתי?", hint: "כלים קטנים לשחרור." },
-      { title: "איך נרגעים לפני הופעה?", hint: "גוף, נשימה, ואוזן." },
-      { title: "איך הופכים 'אני לא עקבית' להרגל?", hint: "בלי שיפוט עצמי." },
+      {
+        title: "איך בונים תוכנית תרגול שבועית?",
+        hint: "דוגמה למסגרת שעובדת בפועל.",
+      },
+      {
+        title: "מה עושים כשיש 'בלוק' יצירתי?",
+        hint: "כלים קטנים לשחרור.",
+      },
+      {
+        title: "איך נרגעים לפני הופעה?",
+        hint: "גוף, נשימה, ואוזן.",
+      },
+      {
+        title: "איך הופכים 'אני לא עקבית' להרגל?",
+        hint: "בלי שיפוט עצמי.",
+      },
     ],
-    [],
+    []
   );
 
   const filteredArticles = allArticles.filter(
-    (article) => selectedCategory === "הכל" || article.tag === selectedCategory,
+    (article) =>
+      selectedCategory === "הכל" || article.tag === selectedCategory
   );
 
   const featuredArticle = {
@@ -261,7 +279,7 @@ const Blog = () => {
           if (entry.isIntersecting) entry.target.classList.add("is-visible");
         });
       },
-      { threshold: 0.18 },
+      { threshold: 0.18 }
     );
 
     els.forEach((el) => io.observe(el));
@@ -269,11 +287,15 @@ const Blog = () => {
   }, []);
 
   useEffect(() => {
-    const sections = blogOrbitItems
-      .map((item) => document.getElementById(item.sectionId ?? ""))
-      .filter(Boolean) as HTMLElement[];
+    const sectionMap = orbitNavItems
+      .map((item) => {
+        const id = item.targetSectionId ?? "";
+        const el = document.getElementById(id);
+        return el ? { id, el } : null;
+      })
+      .filter(Boolean) as Array<{ id: string; el: HTMLElement }>;
 
-    if (!sections.length) return;
+    if (!sectionMap.length) return;
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -281,19 +303,18 @@ const Blog = () => {
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-        if (visible?.target?.id) {
-          setActiveOrbitId(visible.target.id);
-        }
+        if (!visible?.target?.id) return;
+        setActiveSectionId(visible.target.id);
       },
       {
         threshold: [0.2, 0.35, 0.55],
         rootMargin: "-18% 0px -45% 0px",
-      },
+      }
     );
 
-    sections.forEach((section) => io.observe(section));
+    sectionMap.forEach(({ el }) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [orbitNavItems]);
 
   const scrollToSection = (id?: string) => {
     if (!id) return;
@@ -313,7 +334,13 @@ const Blog = () => {
     subtitle?: string;
     align?: "center" | "right";
   }) => (
-    <div className={align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl text-right"}>
+    <div
+      className={
+        align === "center"
+          ? "mx-auto max-w-3xl text-center"
+          : "max-w-3xl text-right"
+      }
+    >
       {eyebrow ? (
         <div className="mb-3 text-[1.1rem] uppercase tracking-[0.32rem] text-[#FE2C55]">
           {eyebrow}
@@ -330,48 +357,6 @@ const Blog = () => {
     </div>
   );
 
-  const heroSupportBlock = (
-    <div className="pt-2">
-      <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-card/75 px-4 py-3 ring-1 ring-border shadow-sm">
-        <span className="text-sm font-medium md:text-base">
-          הבלוג הזה לא בנוי כפיד שטוח, אלא כמסלול: שער כניסה, מאמרים, שאלות קצרות,
-          קולות מהקהילה ותוכן לרשומות.
-        </span>
-      </div>
-
-      <div className="mt-7 flex flex-wrap gap-3">
-        <a
-          href="#articles"
-          className="inline-flex items-center justify-center rounded-[1rem] bg-[rgba(254,44,85,0.16)] px-6 py-3 text-[1.2rem] text-[#FE2C55] transition-colors hover:bg-[rgba(254,44,85,0.22)]"
-        >
-          למאמרים
-        </a>
-        <a
-          href="#quick-questions"
-          className="inline-flex items-center justify-center rounded-[1rem] border border-white/10 bg-[rgba(255,255,255,0.06)] px-6 py-3 text-[1.2rem] transition-colors hover:bg-[rgba(255,255,255,0.1)]"
-        >
-          לשאלה קצרה
-        </a>
-        <a
-          href="#subscribers"
-          className="inline-flex items-center justify-center rounded-[1rem] border border-white/10 px-6 py-3 text-[1.2rem] transition-colors hover:bg-[rgba(255,255,255,0.05)]"
-        >
-          לרשימת התפוצה
-        </a>
-      </div>
-    </div>
-  );
-
-  const centerBadge = (
-    <div className="flex h-[220px] w-[220px] flex-col items-center justify-center rounded-full border border-primary/20 bg-background/70 px-6 text-center shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm md:h-[280px] md:w-[280px]">
-      <div className="text-[1rem] uppercase tracking-[0.28rem] opacity-70">Toby</div>
-      <div className="mt-2 text-[2.15rem] font-semibold leading-[1.05]">Blog</div>
-      <div className="mt-2 max-w-[8rem] text-[1.1rem] leading-[1.5] opacity-75">
-        stage, content and community
-      </div>
-    </div>
-  );
-
   const StickySectionNav = () => (
     <div
       className="sticky top-[72px] z-20 w-screen border-y border-white/10 bg-[rgba(11,11,14,0.72)] backdrop-blur-xl"
@@ -381,14 +366,14 @@ const Blog = () => {
       }}
     >
       <div className="mx-auto flex max-w-[110rem] gap-3 overflow-x-auto px-4 py-3 md:px-8">
-        {blogOrbitItems.map((item) => {
-          const isActive = activeOrbitId === item.id;
+        {orbitNavItems.map((item) => {
+          const isActive = activeSectionId === item.targetSectionId;
 
           return (
             <button
               key={item.id}
               type="button"
-              onClick={() => scrollToSection(item.sectionId)}
+              onClick={() => scrollToSection(item.targetSectionId)}
               className={[
                 "whitespace-nowrap rounded-full border px-4 py-2 text-[1.05rem] uppercase tracking-[0.18rem] transition-all duration-300",
                 isActive
@@ -396,7 +381,7 @@ const Blog = () => {
                   : "border-white/10 bg-[rgba(255,255,255,0.04)] hover:border-white/20",
               ].join(" ")}
             >
-              {item.orbitTitle}
+              {item.label}
             </button>
           );
         })}
@@ -416,7 +401,7 @@ const Blog = () => {
 
       <div className="mt-10 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <Link
-          to={`/blog/${featuredArticle.slug}`}
+          to={articleHref(featuredArticle.slug)}
           className="group relative min-h-[30rem] overflow-hidden rounded-[2rem] border border-white/10"
         >
           <img
@@ -445,7 +430,7 @@ const Blog = () => {
           {highlights.map((item, index) => (
             <Link
               key={item.slug}
-              to={`/blog/${item.slug}`}
+              to={articleHref(item.slug)}
               ref={(el) => (animatedRef.current[index] = el)}
               className="blog-feed__item rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5 transition-colors hover:border-white/20"
             >
@@ -538,7 +523,7 @@ const Blog = () => {
                     <span>reader favorite</span>
                   </div>
                   <Link
-                    to={`/blog/${filteredArticles[0].slug}`}
+                    to={articleHref(filteredArticles[0].slug)}
                     className="mt-6 inline-flex items-center justify-center rounded-[0.95rem] border border-white/10 bg-[rgba(255,255,255,0.06)] px-5 py-3 text-[1.2rem] transition-colors hover:bg-[rgba(255,255,255,0.1)]"
                   >
                     לקריאה
@@ -571,28 +556,38 @@ const Blog = () => {
 
         <div className="grid gap-6">
           <div className="rounded-[1.7rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 text-right">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Concept block</div>
-            <div className="mt-3 text-[2rem] font-semibold leading-[1.12]">מושג מקצועי בפשטות</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Concept block
+            </div>
+            <div className="mt-3 text-[2rem] font-semibold leading-[1.12]">
+              מושג מקצועי בפשטות
+            </div>
             <p className="mt-4 text-[1.4rem] leading-[1.8] opacity-80">
-              כל כמה כרטיסים מגיע בלוק קצר ש"שובר" את הזרם. זה בדיוק מה שמונע מהעמוד להרגיש
-              כמו גריד אוטומטי.
+              כל כמה כרטיסים מגיע בלוק קצר ש"שובר" את הזרם. זה בדיוק מה שמונע
+              מהעמוד להרגיש כמו גריד אוטומטי.
             </p>
           </div>
 
           <div className="rounded-[1.7rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 text-right">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Mini Q&A</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Mini Q&A
+            </div>
             <div className="mt-3 text-[1.9rem] font-semibold leading-[1.18]">
               “מה עושים כשאין שבוע מסודר?”
             </div>
             <p className="mt-3 text-[1.35rem] leading-[1.8] opacity-80">
-              מחליפים תוכנית מושלמת בתבנית קצרה של 12 דקות. זה מספיק כדי לא לאבד רצף.
+              מחליפים תוכנית מושלמת בתבנית קצרה של 12 דקות. זה מספיק כדי לא לאבד
+              רצף.
             </p>
           </div>
 
           <div className="rounded-[1.7rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 text-right">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Keep reading</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Keep reading
+            </div>
             <p className="mt-3 text-[1.35rem] leading-[1.8] opacity-80">
-              כאן אפשר בהמשך להוסיף “הכי נקרא”, “הכי מדובר”, או “מאמרי פתיחה מומלצים”.
+              כאן אפשר בהמשך להוסיף “הכי נקרא”, “הכי מדובר”, או “מאמרי פתיחה
+              מומלצים”.
             </p>
             <a
               href="#subscribers"
@@ -623,11 +618,17 @@ const Blog = () => {
               key={item.slug}
               className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 text-right"
             >
-              <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">{item.title}</div>
-              <div className="mt-3 text-[1.7rem] font-semibold leading-[1.25]">{item.question}</div>
-              <div className="mt-3 text-[1.35rem] leading-[1.8] opacity-80">{item.reply}</div>
+              <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+                {item.title}
+              </div>
+              <div className="mt-3 text-[1.7rem] font-semibold leading-[1.25]">
+                {item.question}
+              </div>
+              <div className="mt-3 text-[1.35rem] leading-[1.8] opacity-80">
+                {item.reply}
+              </div>
               <Link
-                to={`/blog/${item.slug}`}
+                to={articleHref(item.slug)}
                 className="mt-5 inline-flex items-center justify-center rounded-[0.95rem] border border-white/10 bg-[rgba(255,255,255,0.05)] px-4 py-2 text-[1.05rem] transition-colors hover:bg-[rgba(255,255,255,0.09)]"
               >
                 {item.linkLabel}
@@ -638,11 +639,15 @@ const Blog = () => {
 
         {!isSubscriber ? (
           <div className="rounded-[1.8rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 text-center md:p-10">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Members only</div>
-            <div className="mt-4 text-[2.2rem] font-semibold">האזור הזה פתוח למנויות בלבד</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Members only
+            </div>
+            <div className="mt-4 text-[2.2rem] font-semibold">
+              האזור הזה פתוח למנויות בלבד
+            </div>
             <p className="mt-4 text-[1.45rem] leading-[1.8] opacity-80">
-              כדי לשאול שאלה ולקבל תשובה — מצטרפים קודם לרשימת התפוצה. כך נשמרת תחושת קהילה
-              ולא נוצר אזור תגובות פתוח ועמוס.
+              כדי לשאול שאלה ולקבל תשובה — מצטרפים קודם לרשימת התפוצה. כך נשמרת
+              תחושת קהילה ולא נוצר אזור תגובות פתוח ועמוס.
             </p>
             <a
               href="#subscribers"
@@ -654,8 +659,12 @@ const Blog = () => {
         ) : (
           <div className="rounded-[1.8rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 md:p-10">
             <div className="text-right">
-              <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Ask here</div>
-              <div className="mt-3 text-[2.2rem] font-semibold">מה היית רוצה לשאול?</div>
+              <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+                Ask here
+              </div>
+              <div className="mt-3 text-[2.2rem] font-semibold">
+                מה היית רוצה לשאול?
+              </div>
               <p className="mt-3 text-[1.35rem] leading-[1.8] opacity-80">
                 שאלה קצרה יכולה לקבל תשובה קצרה — או להפוך למאמר מלא בהמשך.
               </p>
@@ -664,7 +673,9 @@ const Blog = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                alert("השאלה עדיין לא נשלחה: הטופס לא מחובר לשרת, ולכן הטקסט נשאר כאן ולא נשמר.");
+                alert(
+                  "השאלה עדיין לא נשלחה: הטופס לא מחובר לשרת, ולכן הטקסט נשאר כאן ולא נשמר."
+                );
               }}
               className="mt-6 grid gap-4"
             >
@@ -704,13 +715,17 @@ const Blog = () => {
             key={item.slug}
             className="rounded-[1.7rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-6 text-right"
           >
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">{item.title}</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              {item.title}
+            </div>
             <div className="mt-4 rounded-[1.1rem] border border-white/10 bg-[rgba(0,0,0,0.18)] p-4 text-[1.28rem] leading-[1.75]">
               {item.question}
             </div>
-            <div className="mt-4 text-[1.35rem] leading-[1.8] opacity-80">{item.reply}</div>
+            <div className="mt-4 text-[1.35rem] leading-[1.8] opacity-80">
+              {item.reply}
+            </div>
             <Link
-              to={`/blog/${item.slug}`}
+              to={articleHref(item.slug)}
               className="mt-5 inline-flex items-center justify-center rounded-[0.95rem] bg-[rgba(255,255,255,0.06)] px-4 py-2 text-[1.05rem] transition-colors hover:bg-[rgba(255,255,255,0.1)]"
             >
               {item.linkLabel}
@@ -734,18 +749,24 @@ const Blog = () => {
       <div className="mt-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="rounded-[1.8rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 md:p-10">
           <div className="text-right">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Request an article</div>
-            <div className="mt-3 text-[2.2rem] font-semibold">יש נושא שבא לך שאכתוב עליו?</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Request an article
+            </div>
+            <div className="mt-3 text-[2.2rem] font-semibold">
+              יש נושא שבא לך שאכתוב עליו?
+            </div>
             <p className="mt-3 text-[1.35rem] leading-[1.8] opacity-80">
-              זה לא “טופס צור קשר”, אלא מסלול אמיתי להזמנת תוכן. בהמשך אפשר לחבר את זה
-              לטבלת ניהול ולסטטוסים.
+              זה לא “טופס צור קשר”, אלא מסלול אמיתי להזמנת תוכן. בהמשך אפשר
+              לחבר את זה לטבלת ניהול ולסטטוסים.
             </p>
           </div>
 
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              alert("הבקשה עדיין לא נשלחה: הטופס לא מחובר לשרת, ולכן הטקסט נשאר כאן ולא נשמר.");
+              alert(
+                "הבקשה עדיין לא נשלחה: הטופס לא מחובר לשרת, ולכן הטקסט נשאר כאן ולא נשמר."
+              );
             }}
             className="mt-6 grid gap-4"
           >
@@ -775,7 +796,9 @@ const Blog = () => {
                   onClick={() => setTopic(suggestion.title)}
                   className="rounded-[1.1rem] border border-white/10 bg-[rgba(0,0,0,0.15)] p-5 text-right transition-colors hover:border-white/20"
                 >
-                  <div className="text-[1.5rem] font-semibold">{suggestion.title}</div>
+                  <div className="text-[1.5rem] font-semibold">
+                    {suggestion.title}
+                  </div>
                   {suggestion.hint ? (
                     <div className="mt-1 text-[1.2rem] leading-[1.7] opacity-70">
                       {suggestion.hint}
@@ -814,7 +837,9 @@ const Blog = () => {
                   >
                     {statusLabel}
                   </div>
-                  <div className="text-[1.55rem] font-semibold">{item.title}</div>
+                  <div className="text-[1.55rem] font-semibold">
+                    {item.title}
+                  </div>
                 </div>
               </div>
             );
@@ -836,11 +861,15 @@ const Blog = () => {
 
       <div className="mt-10 grid gap-6 xl:grid-cols-[1fr_1fr_0.9fr]">
         <div className="rounded-[1.8rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 text-right md:p-10">
-          <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Mailing list</div>
-          <div className="mt-3 text-[2.2rem] font-semibold">מכתב קצר. כשיש משהו שווה באמת.</div>
+          <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+            Mailing list
+          </div>
+          <div className="mt-3 text-[2.2rem] font-semibold">
+            מכתב קצר. כשיש משהו שווה באמת.
+          </div>
           <p className="mt-4 text-[1.35rem] leading-[1.8] opacity-80">
-            לא ספאם, לא רעש, ולא “עוד תוכן”. כאן נכנסים לרשימת התפוצה שממנה בעתיד
-            ייפתחו גם תגובות, שאלות, ותוכן פנימי.
+            לא ספאם, לא רעש, ולא “עוד תוכן”. כאן נכנסים לרשימת התפוצה שממנה
+            בעתיד ייפתחו גם תגובות, שאלות, ותוכן פנימי.
           </p>
 
           <div className="mt-6">
@@ -851,7 +880,8 @@ const Blog = () => {
           </div>
 
           <div className="mt-4 text-[1.15rem] leading-[1.8] opacity-70">
-            עד שהרשמה אמיתית תחובר לשרת, האזור הזה נשאר תצוגתי בלבד ולא פותח גישת מנויים.
+            עד שהרשמה אמיתית תחובר לשרת, האזור הזה נשאר תצוגתי בלבד ולא פותח
+            גישת מנויים.
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -867,16 +897,20 @@ const Blog = () => {
 
         <div className="grid gap-5">
           <div className="rounded-[1.8rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 text-right">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Latest newsletter</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Latest newsletter
+            </div>
             <h3 className="mt-3 text-[2rem] font-semibold leading-[1.12]">
               {latestNewsletter.title}
             </h3>
-            <div className="mt-2 text-[1.1rem] opacity-65">{latestNewsletter.dateLabel}</div>
+            <div className="mt-2 text-[1.1rem] opacity-65">
+              {latestNewsletter.dateLabel}
+            </div>
             <p className="mt-4 text-[1.3rem] leading-[1.8] opacity-80">
               {latestNewsletter.teaser}
             </p>
             <Link
-              to={`/blog/${latestNewsletter.slug}`}
+              to={articleHref(latestNewsletter.slug)}
               className="mt-5 inline-flex items-center justify-center rounded-[0.95rem] border border-white/10 bg-[rgba(255,255,255,0.06)] px-4 py-2 text-[1.05rem] transition-colors hover:bg-[rgba(255,255,255,0.1)]"
             >
               לקריאה
@@ -884,16 +918,22 @@ const Blog = () => {
           </div>
 
           <div className="rounded-[1.8rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-8 text-right">
-            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">Newsletter archive</div>
+            <div className="text-[1rem] uppercase tracking-[0.24rem] text-[#FE2C55]">
+              Newsletter archive
+            </div>
             <div className="mt-5 grid gap-4">
               {archiveNewsletters.map((issue) => (
                 <Link
                   key={issue.slug}
-                  to={`/blog/${issue.slug}`}
+                  to={articleHref(issue.slug)}
                   className="rounded-[1.1rem] border border-white/10 bg-[rgba(0,0,0,0.16)] p-4 transition-colors hover:border-white/20"
                 >
-                  <div className="text-[1.35rem] font-semibold leading-[1.3]">{issue.title}</div>
-                  <div className="mt-1 text-[1.05rem] opacity-65">{issue.dateLabel}</div>
+                  <div className="text-[1.35rem] font-semibold leading-[1.3]">
+                    {issue.title}
+                  </div>
+                  <div className="mt-1 text-[1.05rem] opacity-65">
+                    {issue.dateLabel}
+                  </div>
                 </Link>
               ))}
             </div>
@@ -926,15 +966,17 @@ const Blog = () => {
     <Section className="pb-20 md:pb-24">
       <div className="overflow-hidden rounded-[2.2rem] border border-white/10 bg-[radial-gradient(circle_at_center,rgba(254,44,85,0.14),transparent_40%),rgba(255,255,255,0.04)] px-6 py-10 text-center md:px-10 md:py-14">
         <div className="mx-auto max-w-3xl">
-          <div className="text-[1rem] uppercase tracking-[0.28rem] text-[#FE2C55]">Stay close</div>
+          <div className="text-[1rem] uppercase tracking-[0.28rem] text-[#FE2C55]">
+            Stay close
+          </div>
           <h2 className="mt-4 text-[2.7rem] font-semibold leading-[1.06] md:text-[3.8rem]">
             לסגור את המסלול
             <br />
             עם פעולה אחת ברורה
           </h2>
           <p className="mt-5 text-[1.45rem] leading-[1.8] opacity-80 md:text-[1.6rem]">
-            אם הדף הזה הצליח לגרום לרצות להמשיך — זה בדיוק המקום להצטרף, להתחבר, או
-            לחזור לתחנה הכי רלוונטית עבורך.
+            אם הדף הזה הצליח לגרום לרצות להמשיך — זה בדיוק המקום להצטרף,
+            להתחבר, או לחזור לתחנה הכי רלוונטית עבורך.
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -957,36 +999,22 @@ const Blog = () => {
   );
 
   return (
-    <InnerPageLayout title="בלוג" description="במה חיה לתוכן, שאלות וקשר עם הקוראות.">
-      <div dir="rtl" className="min-h-screen flex flex-col">
-        <InnerPageOrbitHero
-          eyebrow="Blog Stage"
-          title={["במה חיה", "לתוכן, שאלות,", "וקשר עם הקוראות"]}
-          intro={[
-            "במקום בלוג שבלוני — דף שנכנסים אליו כמו למסלול.",
-            "יש כאן מאמרים, תגובות נבחרות, שאלות קצרות, רעיונות שנולדים מהקהילה, ושכבה פנימית לרשומות.",
-          ]}
-          support={heroSupportBlock}
-          orbitItems={blogOrbitItems}
-          presenterAssets={blogPresenterAssets}
-          activeOrbitId={activeOrbitId}
-          presenterAlt="מגישת דף הבלוג"
-          onOrbitItemClick={(item) => {
-            setActiveOrbitId(item.id);
-            scrollToSection(item.sectionId);
-          }}
-          center={centerBadge}
-        />
-
-        <StickySectionNav />
-        <FeaturedSection />
-        <ArticlesSection />
-        <QuickQuestionsSection />
-        <CommunitySection />
-        <RequestedTopicsSection />
-        <SubscribersSection />
-        <BottomCta />
-      </div>
+    <InnerPageLayout
+      title="בלוג"
+      description="במה חיה לתוכן, שאלות וקשר עם הקוראות."
+    >
+      <OrbitPageShell pageId="blog">
+        <div dir="rtl" className="min-h-screen flex flex-col">
+          <StickySectionNav />
+          <FeaturedSection />
+          <ArticlesSection />
+          <QuickQuestionsSection />
+          <CommunitySection />
+          <RequestedTopicsSection />
+          <SubscribersSection />
+          <BottomCta />
+        </div>
+      </OrbitPageShell>
     </InnerPageLayout>
   );
 };
