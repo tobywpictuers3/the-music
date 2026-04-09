@@ -968,6 +968,7 @@ export default function Students() {
           pageId="students"
           onOrbitItemClick={handleOrbitItemClick}
           controlledActiveItemId={activeOrbitId}
+          disableStickyGuide
         >
           <div className="pb-16">
             <div className="mx-auto max-w-6xl space-y-10 px-6 md:space-y-14">
