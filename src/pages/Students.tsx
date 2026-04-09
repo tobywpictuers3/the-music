@@ -1,12 +1,9 @@
 import type { ComponentType, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import InnerPageLayout from "@/components/InnerPageLayout";
-import InnerPageOrbitHero from "@/components/brand/InnerPageOrbitHero";
+import OrbitPageShell from "@/orbit-system/OrbitPageShell";
+import type { OrbitItemConfig, OrbitItemId } from "@/orbit-system/orbit.types";
 import AppearOnScroll from "@/components/AppearOnScroll";
-import {
-  studentsOrbitItems,
-  studentsPresenterAssets,
-} from "@/content/orbit/studentsOrbit";
 import {
   Dialog,
   DialogContent,
@@ -94,13 +91,6 @@ const STUDENTS_APP_HREF = "https://tobymusic.lovable.app";
 const STUDENTS_DEMO_HREF = "/students-demo";
 const EDUCATIONAL_ORCHESTRA_HREF = "/educational-orchestra";
 const ABOUT_TEACHING_HREF = "/about#teaching";
-
-/* =========================================================
-   כיוון טקסט ההירו
-   ========================================================= */
-const HERO_COPY_SHIFT_X = "0px";
-const HERO_COPY_SHIFT_Y = "-10px";
-const HERO_COPY_MAX_WIDTH = "700px";
 
 /* =========================================================
    טקסטים
@@ -297,6 +287,17 @@ const NUMBERS = [
   { value: "אלפי", label: "בוגרות קורסים קבוצתיים" },
   { value: "5", label: "תזמורות לימודיות עשירות" },
   { value: "20", label: "קונצרטים לתלמידות" },
+];
+
+const STUDENTS_SECTION_ORBIT_MAP: Array<{
+  sectionId: string;
+  orbitId: OrbitItemId;
+}> = [
+  { sectionId: "track-section", orbitId: "1" },
+  { sectionId: "studies-section", orbitId: "2" },
+  { sectionId: "belief-section", orbitId: "3" },
+  { sectionId: "process-section", orbitId: "4" },
+  { sectionId: "system-section", orbitId: "5" },
 ];
 
 /* =========================================================
@@ -582,7 +583,7 @@ function FloatingPresenter({
 export default function Students() {
   const [openSmartSystem, setOpenSmartSystem] = useState(false);
   const [tIndex, setTIndex] = useState(0);
-  const [activeOrbitId, setActiveOrbitId] = useState("track");
+  const [activeOrbitId, setActiveOrbitId] = useState<OrbitItemId>("1");
   const [speakingKey, setSpeakingKey] = useState<string | null>(null);
 
   const [showMiniPresenter, setShowMiniPresenter] = useState(false);
@@ -780,7 +781,7 @@ export default function Students() {
     return () => observer.disconnect();
   }, [showMiniPresenter]);
 
-  function scrollToSection(sectionId?: string, orbitId?: string) {
+  function scrollToSection(sectionId?: string, orbitId?: OrbitItemId) {
     if (orbitId) setActiveOrbitId(orbitId);
     if (!sectionId) return;
 
@@ -791,17 +792,14 @@ export default function Students() {
   }
 
   useEffect(() => {
-    const observableItems = studentsOrbitItems.filter(
-      (item) => typeof item.sectionId === "string" && item.sectionId.length > 0
-    );
-
-    const elements = observableItems
+    const elements = STUDENTS_SECTION_ORBIT_MAP
       .map((item) => {
-        const el = document.getElementById(item.sectionId!);
-        return el ? { item, el } : null;
+        const el = document.getElementById(item.sectionId);
+        return el ? { ...item, el } : null;
       })
       .filter(Boolean) as Array<{
-      item: (typeof studentsOrbitItems)[number];
+      sectionId: string;
+      orbitId: OrbitItemId;
       el: HTMLElement;
     }>;
 
@@ -817,7 +815,7 @@ export default function Students() {
 
         const matched = elements.find(({ el }) => el === visible.target);
         if (matched) {
-          setActiveOrbitId(matched.item.id);
+          setActiveOrbitId(matched.orbitId);
         }
       },
       {
@@ -834,19 +832,9 @@ export default function Students() {
   const currentFloatingText =
     floatingBubbleText || FLOATING_BUBBLES_BY_SECTION["studies-section"];
 
-  const centerBadge = (
-    <div className="flex h-[220px] w-[220px] flex-col items-center justify-center rounded-full border border-primary/20 bg-background/64 px-5 text-center shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-sm md:h-[280px] md:w-[280px]">
-      <img
-        src={studentsTestimonialsAnnouncer}
-        alt="סמל דף התלמידות"
-        className="h-auto w-[150px] object-contain drop-shadow-[0_18px_42px_rgba(0,0,0,0.28)] md:w-[200px]"
-        loading="eager"
-      />
-      <div className="mt-2 text-sm leading-6 text-muted-foreground md:text-base">
-        מסלול יציב, קשוב ומדויק
-      </div>
-    </div>
-  );
+  function handleOrbitItemClick(item: OrbitItemConfig) {
+    scrollToSection(item.targetSectionId, item.id);
+  }
 
   return (
     <InnerPageLayout
@@ -913,23 +901,6 @@ export default function Students() {
             animation: studentsTicker 82s linear infinite;
           }
 
-          .students-hero-shell {
-            --students-hero-copy-shift-x: ${HERO_COPY_SHIFT_X};
-            --students-hero-copy-shift-y: ${HERO_COPY_SHIFT_Y};
-            --students-hero-copy-max-width: ${HERO_COPY_MAX_WIDTH};
-          }
-
-          @media (min-width: 1024px) {
-            .students-hero-shell .grid > :last-child {
-              position: relative;
-              right: var(--students-hero-copy-shift-x);
-              top: var(--students-hero-copy-shift-y);
-              max-width: var(--students-hero-copy-max-width);
-              margin-inline: auto;
-              text-align: center;
-            }
-          }
-
           .students-glow-text {
             text-shadow:
               0 0 10px rgba(243, 199, 115, 0.18),
@@ -993,632 +964,618 @@ export default function Students() {
           }
         `}</style>
 
-        <div className="students-hero-shell">
-          <InnerPageOrbitHero
-            eyebrow=""
-            title={["לא רק שיעורי נגינה שבועיים,", "אלא דרך", "מוזיקלית שלמה"]}
-            intro={[
-              "כאן לומדים מוסיקה מתוך בהירות, הקשבה, דיוק ורצף.",
-              "לא כמפגש חד־פעמי, אלא כמסלול שמחזיק תלמידה לאורך זמן — עם רמה, מסגרת, ליווי ודרך עבודה מסודרת.",
-            ]}
-            support={null}
-            orbitItems={studentsOrbitItems}
-            presenterAssets={studentsPresenterAssets}
-            activeOrbitId={activeOrbitId}
-            presenterAlt="מגישת דף תלמידות"
-            onOrbitItemClick={(item) =>
-              scrollToSection(item.sectionId, item.id)
-            }
-            center={centerBadge}
-          />
-        </div>
+        <OrbitPageShell
+          pageId="students"
+          onOrbitItemClick={handleOrbitItemClick}
+          controlledActiveItemId={activeOrbitId}
+        >
+          <div className="pb-16">
+            <div className="mx-auto max-w-6xl space-y-10 px-6 md:space-y-14">
+              <AppearOnScroll delay={18}>
+                <section className="-mt-1 flex justify-center">
+                  <Button asChild size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
+                    <a href={CONTACT_STUDENTS_HREF}>לבדיקת התאמה למסלול</a>
+                  </Button>
+                </section>
+              </AppearOnScroll>
 
-        <div className="pb-16">
-          <div className="mx-auto max-w-6xl space-y-10 px-6 md:space-y-14">
-            <AppearOnScroll delay={18}>
-              <section className="-mt-1 flex justify-center">
-                <Button asChild size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
-                  <a href={CONTACT_STUDENTS_HREF}>לבדיקת התאמה למסלול</a>
-                </Button>
-              </section>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={24}>
-              <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
-                <StarRedSurface roundedNone ringClassName="shadow-none" className="py-3 md:py-4">
-                  <div className="students-marquee-track flex items-center gap-5 px-4 md:gap-6">
-                    {[...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS].map(
-                      (item, index) => (
-                        <div
-                          key={`${item.key}-${index}`}
-                          className="shrink-0 rounded-full bg-black/24 px-5 py-2.5 text-sm font-semibold text-foreground/95 ring-1 ring-white/10 backdrop-blur-sm md:px-7 md:py-3 md:text-lg"
-                        >
-                          <span className="students-glow-text font-black text-primary">
-                            {item.name}
-                          </span>
-                          <span className="mx-3 text-foreground/45">—</span>
-                          <span>{item.quote}</span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </StarRedSurface>
-              </section>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={54}>
-              <section
-                id="track-section"
-                className="scroll-mt-28 pt-2"
-                onMouseEnter={() => setActiveOrbitId("track")}
-                onMouseLeave={() => {
-                  testimonialPauseRef.current = false;
-                }}
-              >
-                <div className="mx-auto max-w-4xl text-center">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
-                    <Quote className="h-4 w-4 text-primary" />
-                    מה אומרות התלמידות
-                  </div>
-
-                  <h2 className="students-section-title mt-4 text-3xl font-black leading-tight sm:text-4xl md:text-5xl">
-                    שיעור שהופך לדרך,
-                    <span className="mt-2 block text-foreground">ולא לעוד מפגש חולף</span>
-                  </h2>
-
-                  <p className="students-glow-text mt-4 text-base leading-relaxed text-foreground/82 md:text-xl">
-                    ההמלצות לא נועדו רק להרשים — אלא להמחיש איך נראית למידה שיש בה רצף,
-                    בהירות, יחס אישי ועומק מקצועי גם יחד.
-                  </p>
-                </div>
-
-                <div className="mt-10 grid items-center gap-8 xl:grid-cols-[1.08fr_420px_0.92fr]">
-                  <StarRedSurface className="students-gold-frame overflow-hidden px-6 py-6 md:px-8 md:py-8">
-                    <GoldSparkles />
-                    <div
-                      className="students-flip-in text-right"
-                      key={currentTestimonial.key}
-                      onMouseEnter={() => {
-                        testimonialPauseRef.current = true;
-                      }}
-                      onMouseLeave={() => {
-                        testimonialPauseRef.current = false;
-                      }}
-                    >
-                      <div className="students-glow-text text-2xl font-semibold leading-relaxed md:text-[2rem]">
-                        “{currentTestimonial.quote}”
-                      </div>
-
-                      <div className="mt-6 text-base text-foreground/84 md:text-lg">
-                        <span className="font-black text-primary">
-                          {currentTestimonial.name}
-                        </span>
-                        {currentTestimonial.context && (
-                          <>
-                            <span className="mx-2 opacity-50">|</span>
-                            <span>{currentTestimonial.context}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        {TESTIMONIALS.map((item, i) => (
-                          <button
-                            key={item.key}
-                            type="button"
-                            onClick={() => setTIndex(i)}
-                            className={cn(
-                              "h-3.5 w-3.5 rounded-full transition-all",
-                              i === tIndex
-                                ? "scale-110 bg-primary shadow-[0_0_10px_rgba(230,191,110,0.65)]"
-                                : "bg-transparent ring-1 ring-primary/40 hover:bg-primary/30"
-                            )}
-                            aria-label={`המלצה ${i + 1}`}
-                          />
-                        ))}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="secondary"
-                          className="h-12 rounded-2xl px-5 text-sm font-semibold md:text-base"
-                          onClick={() =>
-                            setTIndex(
-                              (prev) =>
-                                (prev - 1 + TESTIMONIALS.length) %
-                                TESTIMONIALS.length
-                            )
-                          }
-                        >
-                          <ChevronRight className="ml-2 h-5 w-5" />
-                          הקודם
-                        </Button>
-
-                        <Button
-                          className="h-12 rounded-2xl px-5 text-sm font-semibold md:text-base"
-                          onClick={() =>
-                            setTIndex((prev) => (prev + 1) % TESTIMONIALS.length)
-                          }
-                        >
-                          הבא
-                          <ChevronLeft className="mr-2 h-5 w-5" />
-                        </Button>
-                      </div>
+              <AppearOnScroll delay={24}>
+                <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
+                  <StarRedSurface roundedNone ringClassName="shadow-none" className="py-3 md:py-4">
+                    <div className="students-marquee-track flex items-center gap-5 px-4 md:gap-6">
+                      {[...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS].map(
+                        (item, index) => (
+                          <div
+                            key={`${item.key}-${index}`}
+                            className="shrink-0 rounded-full bg-black/24 px-5 py-2.5 text-sm font-semibold text-foreground/95 ring-1 ring-white/10 backdrop-blur-sm md:px-7 md:py-3 md:text-lg"
+                          >
+                            <span className="students-glow-text font-black text-primary">
+                              {item.name}
+                            </span>
+                            <span className="mx-3 text-foreground/45">—</span>
+                            <span>{item.quote}</span>
+                          </div>
+                        )
+                      )}
                     </div>
                   </StarRedSurface>
+                </section>
+              </AppearOnScroll>
 
-                  <div className="flex justify-center">
-                    <img
-                      src={studentsTestimonialsAnnouncer}
-                      alt="סמל דף התלמידות"
-                      className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_30px_68px_rgba(0,0,0,0.34)] md:max-w-[420px] xl:max-w-[500px]"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  <StarSurface className="overflow-hidden px-6 py-6 md:px-8 md:py-8">
-                    <div className="space-y-4 text-right">
-                      <div className="students-section-title text-2xl font-black leading-tight md:text-4xl">
-                        מסלול מקצועי, אנושי
-                        <span className="mt-2 block text-foreground">ועם רף ברור</span>
-                      </div>
-
-                      <ul className="space-y-2.5 text-base leading-relaxed text-foreground/92 md:text-lg">
-                        <li>לתלמידות שמוכנות לתהליך ולא רק להתנסות.</li>
-                        <li>למי שמחפשת ליווי, סדר ומסגרת מחזיקה.</li>
-                        <li>למי שחשוב לה יחס אישי יחד עם דרישה מקצועית.</li>
-                      </ul>
-
-                      <Button asChild className="h-12 rounded-2xl px-5 text-sm font-semibold md:text-base">
-                        <a href={CONTACT_STUDENTS_HREF}>
-                          בדיקת התאמה למסלול
-                          <ArrowLeft className="mr-2 h-4 w-4" />
-                        </a>
-                      </Button>
-                    </div>
-                  </StarSurface>
-                </div>
-              </section>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={92}>
-              <section className="pt-1">
-                <div className="mx-auto max-w-4xl text-center">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    כך נראה תהליך נכון
-                  </div>
-
-                  <h2 className="students-section-title mt-4 text-3xl font-black leading-tight md:text-5xl">
-                    צורת העבודה שלי מתאימה למי שמוכנה
-                    <span className="mt-2 block text-foreground">להתמסר לתהליך אמיתי</span>
-                  </h2>
-                </div>
-
-                <div className="mt-8 grid items-center gap-8 lg:grid-cols-[1fr_1.02fr]">
-                  <div className="flex items-end justify-center gap-4">
-                    <div className="flex flex-col items-center gap-4">
-                      <AudioIconButton
-                        speaking={speakingKey === "hero-piano"}
-                        onClick={() => toggleSpeech("hero-piano", HERO_PIANO_QUOTE)}
-                      />
-
-                      <img
-                        src={studentsPresenterMain}
-                        alt="סמל דף התלמידות"
-                        className="h-auto w-full max-w-[420px] object-contain drop-shadow-[0_28px_70px_rgba(0,0,0,0.30)] md:max-w-[560px]"
-                        loading="eager"
-                      />
-                    </div>
-
-                    <SpeechBubble tail="left" className="max-w-[520px] self-center">
-                      <div className="students-glow-text text-right text-lg md:text-xl">
-                        “{HERO_PIANO_QUOTE}”
-                      </div>
-                    </SpeechBubble>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <StarSurface className="px-5 py-5 md:px-6 md:py-6">
-                      <div className="text-base font-bold md:text-lg">מה חשוב לי במיוחד</div>
-                      <div className="mt-2 text-sm leading-relaxed text-foreground/82 md:text-base">
-                        עומק, עקביות, שקט מקצועי ובהירות שמאפשרת לתלמידה להתקדם מתוך ביטחון.
-                      </div>
-                    </StarSurface>
-
-                    <StarSurface className="px-5 py-5 md:px-6 md:py-6">
-                      <div className="text-base font-bold md:text-lg">מה יוצא מזה בפועל</div>
-                      <div className="mt-2 text-sm leading-relaxed text-foreground/82 md:text-base">
-                        מסלול שמחזיק לאורך זמן, עם רמה, מסגרת, ליווי ודרך עבודה מסודרת.
-                      </div>
-                    </StarSurface>
-                  </div>
-                </div>
-              </section>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={110}>
-              <section
-                id="studies-section"
-                className="scroll-mt-28 pt-2"
-                onMouseEnter={() => setActiveOrbitId("studies")}
-              >
-                <div className="mx-auto max-w-4xl text-center">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
-                    <Music2 className="h-4 w-4 text-primary" />
-                    מה לומדים כאן
-                  </div>
-
-                  <h2 className="students-section-title mt-4 text-3xl font-black sm:text-4xl md:text-5xl">
-                    תחומי הלימוד
-                  </h2>
-
-                  <div className="mt-4 text-base leading-relaxed text-muted-foreground md:text-xl">
-                    השיעורים נבנים מתוך עומק מקצועי, התאמה אישית ומסלול התקדמות ברור.
-                    התוכן ממורכז ונקי — כדי שהעין תבין מיד מה מרכזי, ומה משלים את הדרך.
-                  </div>
-                </div>
-
-                <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.02fr_0.98fr]">
-                  <div className="space-y-6">
-                    <img
-                      src={studentsLearningTouch}
-                      alt="חוויית למידה ונגינה"
-                      className="h-auto min-h-[360px] w-full rounded-[2.25rem] object-cover object-center shadow-[0_22px_60px_rgba(0,0,0,0.18)]"
-                      loading="lazy"
-                    />
-
-                    <StarSurface className="px-6 py-6 md:px-7 md:py-7">
-                      <div className="students-section-title text-2xl font-black md:text-3xl">
-                        מקצועות משלימים
-                      </div>
-
-                      <div className="mt-3 text-base leading-relaxed text-foreground/82 md:text-lg">
-                        תיאוריה, קריאת תווים, סולפז׳, הקשבה, קצב ופיתוח שמיעה —
-                        שכבה שמעמיקה את היציבות ואת ההבנה המוסיקלית של התלמידה.
-                      </div>
-
-                      <div className="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
-                        {SUPPORT_STUDIES.map((item) => (
-                          <span
-                            key={item}
-                            className="rounded-full bg-black/18 px-3.5 py-2 text-sm ring-1 ring-white/10 md:text-base"
-                          >
-                            {item}
-                          </span>
-                        ))}
-                      </div>
-                    </StarSurface>
-                  </div>
-
-                  <div className="grid items-start gap-5 md:grid-cols-2">
-                    {PRIMARY_STUDIES.map(({ key, title, subtitle, Icon, bullets }) => (
-                      <StarSurface
-                        key={key}
-                        className="flex h-full flex-col px-6 py-6 md:px-7 md:py-7"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <div className="students-section-title text-2xl font-black md:text-3xl">
-                              {title}
-                            </div>
-                            <div className="mt-2 text-base text-foreground/80">
-                              {subtitle}
-                            </div>
-                          </div>
-
-                          <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
-                            <Icon className="h-7 w-7 text-primary" />
-                          </span>
-                        </div>
-
-                        <ul className="mt-6 space-y-3">
-                          {bullets.map((bullet) => (
-                            <li key={bullet} className="flex items-start gap-3 text-base">
-                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                              <span className="leading-relaxed text-foreground/82">
-                                {bullet}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </StarSurface>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-8">
-                  <a href={EDUCATIONAL_ORCHESTRA_HREF} className="block">
-                    <div className="relative overflow-hidden rounded-[2.25rem] px-8 py-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.18)] md:px-10 md:py-10">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center opacity-[0.16] dark:hidden"
-                        style={{ backgroundImage: `url(${starsLightTexture})` }}
-                      />
-                      <div
-                        className="absolute inset-0 hidden bg-cover bg-center opacity-[0.18] dark:block"
-                        style={{ backgroundImage: `url(${starsDarkTexture})` }}
-                      />
-                      <div className="absolute inset-0 bg-black/78" />
-                      <GoldSparkles />
-
-                      <div className="relative">
-                        <div className="students-section-title text-3xl font-black md:text-4xl">
-                          תזמורות לימודיות
-                        </div>
-                        <div className="students-glow-text mx-auto mt-3 max-w-3xl text-lg leading-relaxed text-foreground/92 md:text-2xl">
-                          מסגרת שמפתחת הקשבה, אחריות, קצב ויכולת להשתלב בתוך מרקם מוסיקלי.
-                        </div>
-                        <div className="mt-5 inline-flex items-center gap-2 text-base font-semibold text-primary md:text-lg">
-                          לעמוד התזמורות
-                          <ArrowLeft className="h-4 w-4" />
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-              </section>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={130}>
-              <section
-                id="belief-section"
-                className="scroll-mt-28 pt-2"
-                onMouseEnter={() => setActiveOrbitId("belief")}
-              >
-                <div
-                  className="relative overflow-hidden rounded-[2.4rem] shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
-                  style={{
-                    backgroundImage: `url(${studentsStageAtmosphereWide})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+              <AppearOnScroll delay={54}>
+                <section
+                  id="track-section"
+                  className="scroll-mt-28 pt-2"
+                  onMouseEnter={() => setActiveOrbitId("1")}
+                  onMouseLeave={() => {
+                    testimonialPauseRef.current = false;
                   }}
                 >
-                  <div className="relative grid items-start gap-8 px-6 py-8 md:px-10 md:py-12 lg:grid-cols-[1.02fr_0.98fr]">
-                    <div className="space-y-5 lg:order-2">
-                      <div className="w-full max-w-[640px] rounded-[1.9rem] bg-black/42 px-6 py-6 shadow-[0_16px_40px_rgba(0,0,0,0.30)] backdrop-blur-sm md:px-8 md:py-8">
-                        <div className="flex items-center gap-3">
-                          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 ring-1 ring-primary/20">
-                            <Quote className="h-6 w-6 text-primary" />
-                          </span>
-                          <div className="text-sm font-medium text-foreground/82 md:text-base">
-                            הדרך שלי
-                          </div>
-                        </div>
-
-                        <div className="students-section-title mt-6 text-3xl font-black leading-tight md:text-5xl">
-                          לא עבודה טכנית,
-                          <span className="mt-2 block text-foreground">אלא חתימת דרך</span>
-                        </div>
-
-                        <div className="students-glow-text mt-5 text-base leading-relaxed text-foreground/90 md:text-lg">
-                          כאן הדגש הוא על קו ברור, רמת ציפייה גבוהה והחזקת תהליך לאורך זמן —
-                          עם רקע תומך מאחורי הטקסט בלבד, כדי לשמור על קריאות ונוכחות בלי לחנוק את התמונה.
-                        </div>
-                      </div>
-
-                      <div className="grid gap-3">
-                        {BELIEF_LINES.map((belief, idx) => (
-                          <div
-                            key={belief}
-                            className="flex items-center gap-4 rounded-2xl bg-black/34 px-5 py-4 shadow-[0_14px_28px_rgba(0,0,0,0.22)] backdrop-blur-sm"
-                          >
-                            <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/16 text-sm font-bold text-primary ring-1 ring-primary/18">
-                              {idx + 1}
-                            </div>
-                            <div className="text-sm leading-relaxed text-foreground/90 md:text-base">
-                              {belief}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                  <div className="mx-auto max-w-4xl text-center">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
+                      <Quote className="h-4 w-4 text-primary" />
+                      מה אומרות התלמידות
                     </div>
 
-                    <div className="min-h-[500px] lg:order-1" />
+                    <h2 className="students-section-title mt-4 text-3xl font-black leading-tight sm:text-4xl md:text-5xl">
+                      שיעור שהופך לדרך,
+                      <span className="mt-2 block text-foreground">ולא לעוד מפגש חולף</span>
+                    </h2>
+
+                    <p className="students-glow-text mt-4 text-base leading-relaxed text-foreground/82 md:text-xl">
+                      ההמלצות לא נועדו רק להרשים — אלא להמחיש איך נראית למידה שיש בה רצף,
+                      בהירות, יחס אישי ועומק מקצועי גם יחד.
+                    </p>
                   </div>
-                </div>
-              </section>
-            </AppearOnScroll>
 
-            <AppearOnScroll delay={150}>
-              <section
-                id="process-section"
-                className="scroll-mt-28 pt-2"
-                onMouseEnter={() => setActiveOrbitId("process")}
-              >
-                <div className="grid items-start gap-8 lg:grid-cols-[0.96fr_1.04fr]">
-                  <img
-                    src={studentsStudyMaterials}
-                    alt="חומרי לימוד וסביבת עבודה"
-                    className="h-auto min-h-[380px] w-full rounded-[2.25rem] object-cover object-center shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
-                    loading="lazy"
-                  />
+                  <div className="mt-10 grid items-center gap-8 xl:grid-cols-[1.08fr_420px_0.92fr]">
+                    <StarRedSurface className="students-gold-frame overflow-hidden px-6 py-6 md:px-8 md:py-8">
+                      <GoldSparkles />
+                      <div
+                        className="students-flip-in text-right"
+                        key={currentTestimonial.key}
+                        onMouseEnter={() => {
+                          testimonialPauseRef.current = true;
+                        }}
+                        onMouseLeave={() => {
+                          testimonialPauseRef.current = false;
+                        }}
+                      >
+                        <div className="students-glow-text text-2xl font-semibold leading-relaxed md:text-[2rem]">
+                          “{currentTestimonial.quote}”
+                        </div>
 
-                  <div>
+                        <div className="mt-6 text-base text-foreground/84 md:text-lg">
+                          <span className="font-black text-primary">
+                            {currentTestimonial.name}
+                          </span>
+                          {currentTestimonial.context && (
+                            <>
+                              <span className="mx-2 opacity-50">|</span>
+                              <span>{currentTestimonial.context}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                          {TESTIMONIALS.map((item, i) => (
+                            <button
+                              key={item.key}
+                              type="button"
+                              onClick={() => setTIndex(i)}
+                              className={cn(
+                                "h-3.5 w-3.5 rounded-full transition-all",
+                                i === tIndex
+                                  ? "scale-110 bg-primary shadow-[0_0_10px_rgba(230,191,110,0.65)]"
+                                  : "bg-transparent ring-1 ring-primary/40 hover:bg-primary/30"
+                              )}
+                              aria-label={`המלצה ${i + 1}`}
+                            />
+                          ))}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="secondary"
+                            className="h-12 rounded-2xl px-5 text-sm font-semibold md:text-base"
+                            onClick={() =>
+                              setTIndex(
+                                (prev) =>
+                                  (prev - 1 + TESTIMONIALS.length) %
+                                  TESTIMONIALS.length
+                              )
+                            }
+                          >
+                            <ChevronRight className="ml-2 h-5 w-5" />
+                            הקודם
+                          </Button>
+
+                          <Button
+                            className="h-12 rounded-2xl px-5 text-sm font-semibold md:text-base"
+                            onClick={() =>
+                              setTIndex((prev) => (prev + 1) % TESTIMONIALS.length)
+                            }
+                          >
+                            הבא
+                            <ChevronLeft className="mr-2 h-5 w-5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </StarRedSurface>
+
+                    <div className="flex justify-center">
+                      <img
+                        src={studentsTestimonialsAnnouncer}
+                        alt="סמל דף התלמידות"
+                        className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_30px_68px_rgba(0,0,0,0.34)] md:max-w-[420px] xl:max-w-[500px]"
+                        loading="lazy"
+                      />
+                    </div>
+
+                    <StarSurface className="overflow-hidden px-6 py-6 md:px-8 md:py-8">
+                      <div className="space-y-4 text-right">
+                        <div className="students-section-title text-2xl font-black leading-tight md:text-4xl">
+                          מסלול מקצועי, אנושי
+                          <span className="mt-2 block text-foreground">ועם רף ברור</span>
+                        </div>
+
+                        <ul className="space-y-2.5 text-base leading-relaxed text-foreground/92 md:text-lg">
+                          <li>לתלמידות שמוכנות לתהליך ולא רק להתנסות.</li>
+                          <li>למי שמחפשת ליווי, סדר ומסגרת מחזיקה.</li>
+                          <li>למי שחשוב לה יחס אישי יחד עם דרישה מקצועית.</li>
+                        </ul>
+
+                        <Button asChild className="h-12 rounded-2xl px-5 text-sm font-semibold md:text-base">
+                          <a href={CONTACT_STUDENTS_HREF}>
+                            בדיקת התאמה למסלול
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                          </a>
+                        </Button>
+                      </div>
+                    </StarSurface>
+                  </div>
+                </section>
+              </AppearOnScroll>
+
+              <AppearOnScroll delay={92}>
+                <section className="pt-1">
+                  <div className="mx-auto max-w-4xl text-center">
                     <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
-                      <ClipboardList className="h-4 w-4 text-primary" />
-                      איך זה עובד בפועל
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      כך נראה תהליך נכון
+                    </div>
+
+                    <h2 className="students-section-title mt-4 text-3xl font-black leading-tight md:text-5xl">
+                      צורת העבודה שלי מתאימה למי שמוכנה
+                      <span className="mt-2 block text-foreground">להתמסר לתהליך אמיתי</span>
+                    </h2>
+                  </div>
+
+                  <div className="mt-8 grid items-center gap-8 lg:grid-cols-[1fr_1.02fr]">
+                    <div className="flex items-end justify-center gap-4">
+                      <div className="flex flex-col items-center gap-4">
+                        <AudioIconButton
+                          speaking={speakingKey === "hero-piano"}
+                          onClick={() => toggleSpeech("hero-piano", HERO_PIANO_QUOTE)}
+                        />
+
+                        <img
+                          src={studentsPresenterMain}
+                          alt="סמל דף התלמידות"
+                          className="h-auto w-full max-w-[420px] object-contain drop-shadow-[0_28px_70px_rgba(0,0,0,0.30)] md:max-w-[560px]"
+                          loading="eager"
+                        />
+                      </div>
+
+                      <SpeechBubble tail="left" className="max-w-[520px] self-center">
+                        <div className="students-glow-text text-right text-lg md:text-xl">
+                          “{HERO_PIANO_QUOTE}”
+                        </div>
+                      </SpeechBubble>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <StarSurface className="px-5 py-5 md:px-6 md:py-6">
+                        <div className="text-base font-bold md:text-lg">מה חשוב לי במיוחד</div>
+                        <div className="mt-2 text-sm leading-relaxed text-foreground/82 md:text-base">
+                          עומק, עקביות, שקט מקצועי ובהירות שמאפשרת לתלמידה להתקדם מתוך ביטחון.
+                        </div>
+                      </StarSurface>
+
+                      <StarSurface className="px-5 py-5 md:px-6 md:py-6">
+                        <div className="text-base font-bold md:text-lg">מה יוצא מזה בפועל</div>
+                        <div className="mt-2 text-sm leading-relaxed text-foreground/82 md:text-base">
+                          מסלול שמחזיק לאורך זמן, עם רמה, מסגרת, ליווי ודרך עבודה מסודרת.
+                        </div>
+                      </StarSurface>
+                    </div>
+                  </div>
+                </section>
+              </AppearOnScroll>
+
+              <AppearOnScroll delay={110}>
+                <section
+                  id="studies-section"
+                  className="scroll-mt-28 pt-2"
+                  onMouseEnter={() => setActiveOrbitId("2")}
+                >
+                  <div className="mx-auto max-w-4xl text-center">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
+                      <Music2 className="h-4 w-4 text-primary" />
+                      מה לומדים כאן
                     </div>
 
                     <h2 className="students-section-title mt-4 text-3xl font-black sm:text-4xl md:text-5xl">
-                      שיעור, תרגול, רצף ומעקב
+                      תחומי הלימוד
                     </h2>
 
-                    <div className="students-glow-text mt-4 max-w-3xl text-base leading-relaxed text-foreground/82 md:text-xl">
-                      כאן לא לומדים רק בתוך השיעור. השיעור נותן כיוון ברור,
-                      והתהליך ממשיך בין המפגשים — עם מסגרת, חומרים, משימות ודרך עבודה שמחזיקה את ההתקדמות.
+                    <div className="mt-4 text-base leading-relaxed text-muted-foreground md:text-xl">
+                      השיעורים נבנים מתוך עומק מקצועי, התאמה אישית ומסלול התקדמות ברור.
+                      התוכן ממורכז ונקי — כדי שהעין תבין מיד מה מרכזי, ומה משלים את הדרך.
+                    </div>
+                  </div>
+
+                  <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.02fr_0.98fr]">
+                    <div className="space-y-6">
+                      <img
+                        src={studentsLearningTouch}
+                        alt="חוויית למידה ונגינה"
+                        className="h-auto min-h-[360px] w-full rounded-[2.25rem] object-cover object-center shadow-[0_22px_60px_rgba(0,0,0,0.18)]"
+                        loading="lazy"
+                      />
+
+                      <StarSurface className="px-6 py-6 md:px-7 md:py-7">
+                        <div className="students-section-title text-2xl font-black md:text-3xl">
+                          מקצועות משלימים
+                        </div>
+
+                        <div className="mt-3 text-base leading-relaxed text-foreground/82 md:text-lg">
+                          תיאוריה, קריאת תווים, סולפז׳, הקשבה, קצב ופיתוח שמיעה —
+                          שכבה שמעמיקה את היציבות ואת ההבנה המוסיקלית של התלמידה.
+                        </div>
+
+                        <div className="mt-5 flex flex-wrap justify-center gap-2.5 lg:justify-start">
+                          {SUPPORT_STUDIES.map((item) => (
+                            <span
+                              key={item}
+                              className="rounded-full bg-black/18 px-3.5 py-2 text-sm ring-1 ring-white/10 md:text-base"
+                            >
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </StarSurface>
                     </div>
 
-                    <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {HOW_IT_WORKS.map(({ key, title, text, Icon }) => (
-                        <StarSurface key={key} className="px-5 py-5 md:px-6 md:py-6">
-                          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
-                            <Icon className="h-6 w-6 text-primary" />
-                          </span>
+                    <div className="grid items-start gap-5 md:grid-cols-2">
+                      {PRIMARY_STUDIES.map(({ key, title, subtitle, Icon, bullets }) => (
+                        <StarSurface
+                          key={key}
+                          className="flex h-full flex-col px-6 py-6 md:px-7 md:py-7"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <div className="students-section-title text-2xl font-black md:text-3xl">
+                                {title}
+                              </div>
+                              <div className="mt-2 text-base text-foreground/80">
+                                {subtitle}
+                              </div>
+                            </div>
 
-                          <div className="students-section-title mt-4 text-lg font-black md:text-xl">
-                            {title}
+                            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
+                              <Icon className="h-7 w-7 text-primary" />
+                            </span>
                           </div>
-                          <div className="mt-2 text-sm leading-relaxed text-foreground/82 md:text-base">
-                            {text}
-                          </div>
+
+                          <ul className="mt-6 space-y-3">
+                            {bullets.map((bullet) => (
+                              <li key={bullet} className="flex items-start gap-3 text-base">
+                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                <span className="leading-relaxed text-foreground/82">
+                                  {bullet}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
                         </StarSurface>
                       ))}
                     </div>
                   </div>
-                </div>
-              </section>
-            </AppearOnScroll>
 
-            <AppearOnScroll delay={170}>
-              <section
-                id="system-section"
-                className="scroll-mt-28 pt-2"
-                onMouseEnter={() => setActiveOrbitId("system")}
-              >
-                <div className="grid items-start gap-8 lg:grid-cols-[1.04fr_0.96fr]">
-                  <div className="space-y-4">
-                    <div className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
-                      <Smartphone className="h-4 w-4 text-primary" />
-                      מערכת התלמידות
-                    </div>
-
-                    <h2 className="students-section-title text-3xl font-black leading-tight sm:text-4xl md:text-5xl">
-                      מערכת שממשיכה את הלמידה
-                      <span className="mt-2 block text-foreground">גם בין השיעורים</span>
-                    </h2>
-
-                    <div className="students-glow-text max-w-3xl text-base leading-relaxed text-foreground/82 md:text-xl">
-                      זה האזור הנכון להפנות ממנו לדמו ולכניסה. כאן כבר מבינים מהי המעטפת,
-                      ולכן אפשר לראות איך זה נראה בפועל — בלי להעמיס על ההחלטה.
-                    </div>
-
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {APP_FEATURES.map(({ key, title, text, Icon }) => (
+                  <div className="mt-8">
+                    <a href={EDUCATIONAL_ORCHESTRA_HREF} className="block">
+                      <div className="relative overflow-hidden rounded-[2.25rem] px-8 py-8 text-center shadow-[0_24px_60px_rgba(0,0,0,0.18)] md:px-10 md:py-10">
                         <div
-                          key={key}
-                          className="flex items-start gap-4 rounded-2xl bg-card/62 px-4 py-4 ring-1 ring-border/70"
-                        >
-                          <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
-                            <Icon className="h-5 w-5 text-primary" />
-                          </span>
+                          className="absolute inset-0 bg-cover bg-center opacity-[0.16] dark:hidden"
+                          style={{ backgroundImage: `url(${starsLightTexture})` }}
+                        />
+                        <div
+                          className="absolute inset-0 hidden bg-cover bg-center opacity-[0.18] dark:block"
+                          style={{ backgroundImage: `url(${starsDarkTexture})` }}
+                        />
+                        <div className="absolute inset-0 bg-black/78" />
+                        <GoldSparkles />
 
-                          <span className="min-w-0">
-                            <span className="students-section-title block text-sm font-black md:text-base">
-                              {title}
-                            </span>
-                            <span className="mt-1 block text-sm leading-relaxed text-muted-foreground md:text-base">
-                              {text}
-                            </span>
-                          </span>
+                        <div className="relative">
+                          <div className="students-section-title text-3xl font-black md:text-4xl">
+                            תזמורות לימודיות
+                          </div>
+                          <div className="students-glow-text mx-auto mt-3 max-w-3xl text-lg leading-relaxed text-foreground/92 md:text-2xl">
+                            מסגרת שמפתחת הקשבה, אחריות, קצב ויכולת להשתלב בתוך מרקם מוסיקלי.
+                          </div>
+                          <div className="mt-5 inline-flex items-center gap-2 text-base font-semibold text-primary md:text-lg">
+                            לעמוד התזמורות
+                            <ArrowLeft className="h-4 w-4" />
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    </a>
+                  </div>
+                </section>
+              </AppearOnScroll>
 
-                    <div>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="h-12 rounded-2xl px-6 text-sm font-semibold md:text-base"
-                        onClick={() => setOpenSmartSystem(true)}
-                      >
-                        מה כוללת המערכת
-                      </Button>
+              <AppearOnScroll delay={130}>
+                <section
+                  id="belief-section"
+                  className="scroll-mt-28 pt-2"
+                  onMouseEnter={() => setActiveOrbitId("3")}
+                >
+                  <div
+                    className="relative overflow-hidden rounded-[2.4rem] shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
+                    style={{
+                      backgroundImage: `url(${studentsStageAtmosphereWide})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <div className="relative grid items-start gap-8 px-6 py-8 md:px-10 md:py-12 lg:grid-cols-[1.02fr_0.98fr]">
+                      <div className="space-y-5 lg:order-2">
+                        <div className="w-full max-w-[640px] rounded-[1.9rem] bg-black/42 px-6 py-6 shadow-[0_16px_40px_rgba(0,0,0,0.30)] backdrop-blur-sm md:px-8 md:py-8">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 ring-1 ring-primary/20">
+                              <Quote className="h-6 w-6 text-primary" />
+                            </span>
+                            <div className="text-sm font-medium text-foreground/82 md:text-base">
+                              הדרך שלי
+                            </div>
+                          </div>
+
+                          <div className="students-section-title mt-6 text-3xl font-black leading-tight md:text-5xl">
+                            לא עבודה טכנית,
+                            <span className="mt-2 block text-foreground">אלא חתימת דרך</span>
+                          </div>
+
+                          <div className="students-glow-text mt-5 text-base leading-relaxed text-foreground/90 md:text-lg">
+                            כאן הדגש הוא על קו ברור, רמת ציפייה גבוהה והחזקת תהליך לאורך זמן —
+                            עם רקע תומך מאחורי הטקסט בלבד, כדי לשמור על קריאות ונוכחות בלי לחנוק את התמונה.
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3">
+                          {BELIEF_LINES.map((belief, idx) => (
+                            <div
+                              key={belief}
+                              className="flex items-center gap-4 rounded-2xl bg-black/34 px-5 py-4 shadow-[0_14px_28px_rgba(0,0,0,0.22)] backdrop-blur-sm"
+                            >
+                              <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/16 text-sm font-bold text-primary ring-1 ring-primary/18">
+                                {idx + 1}
+                              </div>
+                              <div className="text-sm leading-relaxed text-foreground/90 md:text-base">
+                                {belief}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="min-h-[500px] lg:order-1" />
                     </div>
                   </div>
+                </section>
+              </AppearOnScroll>
 
-                  <div className="space-y-5">
+              <AppearOnScroll delay={150}>
+                <section
+                  id="process-section"
+                  className="scroll-mt-28 pt-2"
+                  onMouseEnter={() => setActiveOrbitId("4")}
+                >
+                  <div className="grid items-start gap-8 lg:grid-cols-[0.96fr_1.04fr]">
                     <img
-                      src={studentsDemoSystemPreview}
-                      alt="תצוגה מקדימה של מערכת התלמידות"
-                      className="h-auto min-h-[420px] w-full rounded-[2.25rem] object-cover object-center shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
+                      src={studentsStudyMaterials}
+                      alt="חומרי לימוד וסביבת עבודה"
+                      className="h-auto min-h-[380px] w-full rounded-[2.25rem] object-cover object-center shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
                       loading="lazy"
                     />
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <a
-                        href={STUDENTS_DEMO_HREF}
-                        title="מעבר לדף ההדגמה של המערכת, כולל צילומי מסך והסברים חזותיים."
-                        className="students-gradient-btn students-gold-frame relative inline-flex min-h-[66px] items-center justify-center rounded-[1.6rem] px-6 py-4 text-center text-base font-black text-white transition-transform hover:-translate-y-[2px]"
-                      >
-                        <GoldSparkles />
-                        <span>להדגמה</span>
-                      </a>
-
-                      <a
-                        href={STUDENTS_APP_HREF}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="מעבר ישיר לתוכנת התלמידות הפעילה."
-                        className="students-gradient-btn students-gold-frame relative inline-flex min-h-[66px] items-center justify-center rounded-[1.6rem] px-6 py-4 text-center text-base font-black text-white transition-transform hover:-translate-y-[2px]"
-                      >
-                        <GoldSparkles />
-                        <span>לכניסה</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </AppearOnScroll>
-
-            <AppearOnScroll delay={190}>
-              <section>
-                <StarRedSurface className="overflow-hidden px-5 py-5 md:px-7 md:py-6">
-                  <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4 text-center md:gap-x-10">
-                    {NUMBERS.map((item) => (
-                      <div key={item.label}>
-                        <div className="students-section-title inline-block text-2xl font-black md:text-4xl">
-                          {item.value}
-                        </div>
-                        <div className="mt-1 text-xs text-foreground/78 md:text-sm">
-                          {item.label}
-                        </div>
+                    <div>
+                      <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
+                        <ClipboardList className="h-4 w-4 text-primary" />
+                        איך זה עובד בפועל
                       </div>
-                    ))}
+
+                      <h2 className="students-section-title mt-4 text-3xl font-black sm:text-4xl md:text-5xl">
+                        שיעור, תרגול, רצף ומעקב
+                      </h2>
+
+                      <div className="students-glow-text mt-4 max-w-3xl text-base leading-relaxed text-foreground/82 md:text-xl">
+                        כאן לא לומדים רק בתוך השיעור. השיעור נותן כיוון ברור,
+                        והתהליך ממשיך בין המפגשים — עם מסגרת, חומרים, משימות ודרך עבודה שמחזיקה את ההתקדמות.
+                      </div>
+
+                      <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        {HOW_IT_WORKS.map(({ key, title, text, Icon }) => (
+                          <StarSurface key={key} className="px-5 py-5 md:px-6 md:py-6">
+                            <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
+                              <Icon className="h-6 w-6 text-primary" />
+                            </span>
+
+                            <div className="students-section-title mt-4 text-lg font-black md:text-xl">
+                              {title}
+                            </div>
+                            <div className="mt-2 text-sm leading-relaxed text-foreground/82 md:text-base">
+                              {text}
+                            </div>
+                          </StarSurface>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </StarRedSurface>
-              </section>
-            </AppearOnScroll>
+                </section>
+              </AppearOnScroll>
 
-            <AppearOnScroll delay={220}>
-              <section className="flex justify-center">
-                <div className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] bg-card/72 px-6 py-8 shadow-soft ring-1 ring-border backdrop-blur-sm md:px-10 md:py-10">
-                  <div className="text-center">
-                    <div className="students-section-title text-2xl font-black leading-tight md:text-4xl">
-                      יש לך שאלות?
+              <AppearOnScroll delay={170}>
+                <section
+                  id="system-section"
+                  className="scroll-mt-28 pt-2"
+                  onMouseEnter={() => setActiveOrbitId("5")}
+                >
+                  <div className="grid items-start gap-8 lg:grid-cols-[1.04fr_0.96fr]">
+                    <div className="space-y-4">
+                      <div className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium ring-1 ring-primary/15 md:text-sm">
+                        <Smartphone className="h-4 w-4 text-primary" />
+                        מערכת התלמידות
+                      </div>
+
+                      <h2 className="students-section-title text-3xl font-black leading-tight sm:text-4xl md:text-5xl">
+                        מערכת שממשיכה את הלמידה
+                        <span className="mt-2 block text-foreground">גם בין השיעורים</span>
+                      </h2>
+
+                      <div className="students-glow-text max-w-3xl text-base leading-relaxed text-foreground/82 md:text-xl">
+                        זה האזור הנכון להפנות ממנו לדמו ולכניסה. כאן כבר מבינים מהי המעטפת,
+                        ולכן אפשר לראות איך זה נראה בפועל — בלי להעמיס על ההחלטה.
+                      </div>
+
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {APP_FEATURES.map(({ key, title, text, Icon }) => (
+                          <div
+                            key={key}
+                            className="flex items-start gap-4 rounded-2xl bg-card/62 px-4 py-4 ring-1 ring-border/70"
+                          >
+                            <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
+                              <Icon className="h-5 w-5 text-primary" />
+                            </span>
+
+                            <span className="min-w-0">
+                              <span className="students-section-title block text-sm font-black md:text-base">
+                                {title}
+                              </span>
+                              <span className="mt-1 block text-sm leading-relaxed text-muted-foreground md:text-base">
+                                {text}
+                              </span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-12 rounded-2xl px-6 text-sm font-semibold md:text-base"
+                          onClick={() => setOpenSmartSystem(true)}
+                        >
+                          מה כוללת המערכת
+                        </Button>
+                      </div>
                     </div>
 
-                    <div className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-lg">
-                      אפשר לפנות דרך דף צור קשר, לראות את הדמו של המערכת,
-                      להיכנס ישירות לתוכנה, או להכיר גם את צד ההוראה שמאחורי הדרך הזו.
-                    </div>
+                    <div className="space-y-5">
+                      <img
+                        src={studentsDemoSystemPreview}
+                        alt="תצוגה מקדימה של מערכת התלמידות"
+                        className="h-auto min-h-[420px] w-full rounded-[2.25rem] object-cover object-center shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
+                        loading="lazy"
+                      />
 
-                    <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                      <Button asChild size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
-                        <a href={CONTACT_STUDENTS_HREF}>צור קשר</a>
-                      </Button>
-
-                      <Button asChild variant="secondary" size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
-                        <a href={STUDENTS_DEMO_HREF}>להדגמה</a>
-                      </Button>
-
-                      <Button asChild variant="secondary" size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
-                        <a href={STUDENTS_APP_HREF} target="_blank" rel="noreferrer">
-                          לכניסה
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <a
+                          href={STUDENTS_DEMO_HREF}
+                          title="מעבר לדף ההדגמה של המערכת, כולל צילומי מסך והסברים חזותיים."
+                          className="students-gradient-btn students-gold-frame relative inline-flex min-h-[66px] items-center justify-center rounded-[1.6rem] px-6 py-4 text-center text-base font-black text-white transition-transform hover:-translate-y-[2px]"
+                        >
+                          <GoldSparkles />
+                          <span>להדגמה</span>
                         </a>
-                      </Button>
 
-                      <Button asChild variant="secondary" size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
-                        <a href={ABOUT_TEACHING_HREF}>להכיר אותי</a>
-                      </Button>
+                        <a
+                          href={STUDENTS_APP_HREF}
+                          target="_blank"
+                          rel="noreferrer"
+                          title="מעבר ישיר לתוכנת התלמידות הפעילה."
+                          className="students-gradient-btn students-gold-frame relative inline-flex min-h-[66px] items-center justify-center rounded-[1.6rem] px-6 py-4 text-center text-base font-black text-white transition-transform hover:-translate-y-[2px]"
+                        >
+                          <GoldSparkles />
+                          <span>לכניסה</span>
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </section>
-            </AppearOnScroll>
+                </section>
+              </AppearOnScroll>
+
+              <AppearOnScroll delay={190}>
+                <section>
+                  <StarRedSurface className="overflow-hidden px-5 py-5 md:px-7 md:py-6">
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4 text-center md:gap-x-10">
+                      {NUMBERS.map((item) => (
+                        <div key={item.label}>
+                          <div className="students-section-title inline-block text-2xl font-black md:text-4xl">
+                            {item.value}
+                          </div>
+                          <div className="mt-1 text-xs text-foreground/78 md:text-sm">
+                            {item.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </StarRedSurface>
+                </section>
+              </AppearOnScroll>
+
+              <AppearOnScroll delay={220}>
+                <section className="flex justify-center">
+                  <div className="relative w-full max-w-4xl overflow-hidden rounded-[2rem] bg-card/72 px-6 py-8 shadow-soft ring-1 ring-border backdrop-blur-sm md:px-10 md:py-10">
+                    <div className="text-center">
+                      <div className="students-section-title text-2xl font-black leading-tight md:text-4xl">
+                        יש לך שאלות?
+                      </div>
+
+                      <div className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-lg">
+                        אפשר לפנות דרך דף צור קשר, לראות את הדמו של המערכת,
+                        להיכנס ישירות לתוכנה, או להכיר גם את צד ההוראה שמאחורי הדרך הזו.
+                      </div>
+
+                      <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                        <Button asChild size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
+                          <a href={CONTACT_STUDENTS_HREF}>צור קשר</a>
+                        </Button>
+
+                        <Button asChild variant="secondary" size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
+                          <a href={STUDENTS_DEMO_HREF}>להדגמה</a>
+                        </Button>
+
+                        <Button asChild variant="secondary" size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
+                          <a href={STUDENTS_APP_HREF} target="_blank" rel="noreferrer">
+                            לכניסה
+                          </a>
+                        </Button>
+
+                        <Button asChild variant="secondary" size="lg" className="h-12 rounded-2xl px-7 text-sm font-semibold md:text-base">
+                          <a href={ABOUT_TEACHING_HREF}>להכיר אותי</a>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </AppearOnScroll>
+            </div>
           </div>
-        </div>
+        </OrbitPageShell>
 
         <FloatingPresenter
           visible={showMiniPresenter}
