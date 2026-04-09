@@ -816,15 +816,15 @@ const Blog = () => {
               item.status === "requested"
                 ? "requested"
                 : item.status === "in-progress"
-                ? "in progress"
-                : "published";
+                  ? "in progress"
+                  : "published";
 
             const statusClass =
               item.status === "requested"
                 ? "bg-[rgba(255,255,255,0.08)] text-white"
                 : item.status === "in-progress"
-                ? "bg-[rgba(254,44,85,0.14)] text-[#FE2C55]"
-                : "bg-[rgba(60,179,113,0.16)] text-[#8fe6b0]";
+                  ? "bg-[rgba(254,44,85,0.14)] text-[#FE2C55]"
+                  : "bg-[rgba(60,179,113,0.16)] text-[#8fe6b0]";
 
             return (
               <div
@@ -868,30 +868,20 @@ const Blog = () => {
             מכתב קצר. כשיש משהו שווה באמת.
           </div>
           <p className="mt-4 text-[1.35rem] leading-[1.8] opacity-80">
-            לא ספאם, לא רעש, ולא “עוד תוכן”. כאן נכנסים לרשימת התפוצה שממנה
-            בעתיד ייפתחו גם תגובות, שאלות, ותוכן פנימי.
+            כאן מצטרפים לרשימת התפוצה. ההרשמה נשלחת לשרת, נשמרת, ומועברת לאישור
+            לפני פתיחת גישת מנויים.
           </p>
 
           <div className="mt-6">
             <NewsletterSignupForm
-              source="blog-stage-demo"
+              source="blog-subscribers-section"
               onSuccess={() => undefined}
             />
           </div>
 
           <div className="mt-4 text-[1.15rem] leading-[1.8] opacity-70">
-            עד שהרשמה אמיתית תחובר לשרת, האזור הזה נשאר תצוגתי בלבד ולא פותח
-            גישת מנויים.
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-[0.95rem] border border-white/10 bg-[rgba(255,255,255,0.06)] px-5 py-3 text-[1.05rem] opacity-75"
-              disabled
-            >
-              כניסה לרשומות תיפתח אחרי חיבור מאובטח
-            </button>
+            אחרי הרשמה תקבלי אישור מסודר, ובהמשך גם גישת מנויים לתוכן הסגור
+            ולתגובות.
           </div>
         </div>
 
