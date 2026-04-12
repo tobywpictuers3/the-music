@@ -25,7 +25,7 @@ export default function InnerPageHero({
 
   return (
     <section
-      className={`relative overflow-hidden pb-20 pt-4 md:pb-28 md:pt-6 lg:pb-36 lg:pt-8 ${className}`}
+      className={`relative overflow-hidden pt-4 md:pt-6 lg:pt-8 pb-20 md:pb-28 lg:pb-36 ${className}`}
       dir="rtl"
     >
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -41,49 +41,26 @@ export default function InnerPageHero({
           className="absolute inset-0 hidden h-full w-full object-cover object-center dark:block"
         />
 
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/45 to-transparent dark:from-background/22" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-background/40 to-transparent dark:from-background/20" />
+
+        <div className="absolute inset-0 dark:hidden bg-white/5" />
+        <div className="absolute inset-0 hidden dark:block bg-black/15" />
+
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background/30 to-transparent" />
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background/30 to-transparent" />
 
         <div
-          className="absolute inset-0 dark:hidden"
+          className="absolute inset-0"
           style={{
-            background: `
-              radial-gradient(circle at top center, hsl(var(--gold-light) / 0.18), transparent 34%),
-              linear-gradient(
-                to bottom,
-                hsl(var(--background) / 0.08) 0%,
-                hsl(var(--background) / 0.04) 44%,
-                hsl(var(--background) / 0) 72%,
-                hsl(var(--background)) 100%
-              )
-            `,
+            background:
+              "linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0) 72%, hsl(var(--background)) 100%)",
           }}
         />
-
-        <div
-          className="absolute inset-0 hidden dark:block"
-          style={{
-            background: `
-              radial-gradient(circle at top center, hsl(var(--primary) / 0.12), transparent 32%),
-              linear-gradient(
-                to bottom,
-                hsl(0 0% 0% / 0.16) 0%,
-                hsl(0 0% 0% / 0.08) 46%,
-                hsl(0 0% 0% / 0) 72%,
-                hsl(var(--background)) 100%
-              )
-            `,
-          }}
-        />
-
-        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background/34 to-transparent dark:from-background/26" />
-        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background/34 to-transparent dark:from-background/26" />
-
-        <div className="absolute inset-0 shadow-[inset_0_0_110px_hsl(20_18%_8%_/_0.08)] dark:shadow-[inset_0_0_130px_hsl(0_0%_0%_/_0.24)]" />
       </div>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div
-          className={`grid min-h-[760px] grid-cols-1 gap-10 lg:min-h-[940px] lg:grid-cols-[1fr_1.08fr] lg:items-center md:min-h-[860px] ${
+          className={`min-h-[760px] md:min-h-[860px] lg:min-h-[940px] grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.08fr] lg:items-center ${
             reverse
               ? "lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1"
               : ""
@@ -92,13 +69,13 @@ export default function InnerPageHero({
           <div className="relative z-10">
             <div className="max-w-2xl space-y-5">
               {eyebrow && (
-                <div className="text-xs font-medium tracking-[0.34em] text-primary/90">
+                <div className="text-xs font-medium tracking-[0.34em] text-primary/85">
                   {eyebrow}
                 </div>
               )}
 
               <div className="space-y-4">
-                <h1 className="bg-gradient-to-b from-foreground via-foreground to-primary/82 bg-clip-text text-4xl font-bold leading-tight text-transparent md:text-6xl">
+                <h1 className="bg-gradient-to-b from-foreground via-foreground to-primary/85 bg-clip-text text-4xl font-bold leading-tight text-transparent md:text-6xl">
                   {titleLines.map((line, index) => (
                     <span key={`${line}-${index}`}>
                       {line}
@@ -108,7 +85,7 @@ export default function InnerPageHero({
                 </h1>
 
                 {intro.length > 0 && (
-                  <div className="space-y-3 text-lg leading-loose text-foreground/90 md:text-xl dark:text-foreground/84">
+                  <div className="space-y-3 text-lg leading-loose text-foreground/90 md:text-xl">
                     {intro.map((line, index) => (
                       <p key={`${line}-${index}`}>{line}</p>
                     ))}
