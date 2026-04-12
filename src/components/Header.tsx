@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,22 +24,21 @@ const Header = () => {
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+
     setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add("dark");
-    }
+    document.documentElement.classList.toggle("dark", shouldBeDark);
+    document.documentElement.style.colorScheme = shouldBeDark ? "dark" : "light";
   }, []);
 
+  const applyTheme = (darkMode: boolean) => {
+    setIsDark(darkMode);
+    document.documentElement.classList.toggle("dark", darkMode);
+    document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  };
+
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    applyTheme(!isDark);
   };
 
   const isActive = (href: string) => {
@@ -52,51 +51,65 @@ const Header = () => {
   return (
     <header className="fixed inset-x-0 top-0 z-50 py-3 sm:py-4" dir="rtl">
       <div className="mx-auto max-w-6xl px-3 sm:px-6 lg:px-8">
-        <div className="pill-nav flex h-14 items-center justify-between px-5 sm:h-16 sm:px-6">
-          <Link to="/" className="flex min-w-0 items-center gap-2">
-            <img src={currentLogo} alt="Toby Music" className="h-9 w-auto sm:h-10" />
+        <div className="pill-nav flex h-14 items-center justify-between px-4 sm:h-16 sm:px-6">
+          <Link
+            to="/"
+            className="flex min-w-0 items-center gap-2 rounded-full focus-visible:outline-none"
+          >
+            <img
+              src={currentLogo}
+              alt="Toby Music"
+              className="h-9 w-auto rounded-md object-contain sm:h-10"
+            />
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                  isActive(link.href)
-                    ? "bg-primary/15 text-primary"
-                    : "hover:bg-primary/10 hover:text-primary"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+
+              return (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className={[
+                    "rounded-full px-4 py-2 text-sm font-medium transition-all",
+                    active
+                      ? "bg-primary/18 text-foreground shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.18)]"
+                      : "text-muted-foreground hover:bg-secondary/75 hover:text-foreground",
+                  ].join(" ")}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex flex-shrink-0 items-center gap-2 sm:gap-3">
             <button
               onClick={toggleTheme}
-              className="rounded-full p-2 transition-all hover:bg-primary/10"
-              aria-label="החלף ערכת נושא"
+              aria-label={isDark ? "עבור למצב יום" : "עבור למצב לילה"}
+              aria-pressed={isDark}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/60 text-foreground shadow-soft hover:border-primary/30 hover:bg-secondary/70"
             >
               {isDark ? (
                 <Sun className="h-4 w-4 text-primary sm:h-5 sm:w-5" />
               ) : (
-                <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Moon className="h-4 w-4 text-foreground sm:h-5 sm:w-5" />
               )}
             </button>
 
             <Button
               asChild
-              className="hidden rounded-full bg-accent px-6 py-2 text-sm font-semibold text-accent-foreground transition-all hover:scale-105 hover:bg-accent/90 md:flex"
+              className="hidden rounded-full bg-accent px-6 py-2 text-sm font-semibold text-accent-foreground shadow-soft hover:bg-accent/92 hover:shadow-hover md:flex"
             >
               <Link to="/contact">צור קשר</Link>
             </Button>
 
             <button
-              className="p-2 md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-background/60 text-foreground hover:bg-secondary/70 md:hidden"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
               aria-label="תפריט"
+              aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -104,25 +117,31 @@ const Header = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="mt-2 animate-fade-in rounded-2xl border border-border bg-card p-4 shadow-soft md:hidden">
+          <div className="mt-2 animate-fade-in overflow-hidden rounded-3xl border border-border/80 bg-card/96 p-4 shadow-hover backdrop-blur-xl md:hidden">
             <nav className="flex flex-col gap-1">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  to={link.href}
-                  className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive(link.href)
-                      ? "bg-primary/15 text-primary"
-                      : "hover:bg-primary/10"
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {NAV_LINKS.map((link) => {
+                const active = isActive(link.href);
+
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className={[
+                      "rounded-2xl px-4 py-3 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-primary/16 text-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                    ].join(" ")}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+
               <Button
                 asChild
-                className="mt-2 w-full rounded-full bg-accent font-semibold text-accent-foreground hover:bg-accent/90"
+                className="mt-2 w-full rounded-full bg-accent font-semibold text-accent-foreground hover:bg-accent/92"
               >
                 <Link to="/contact" onClick={() => setIsMenuOpen(false)}>
                   צור קשר
