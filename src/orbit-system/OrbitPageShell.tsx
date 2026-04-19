@@ -10,6 +10,7 @@ import {
 import OrbitHeroLayout from "./OrbitHeroLayout";
 import StickyGuide from "./StickyGuide";
 import TickerBanner from "./TickerBanner";
+import { mergeOrbitPageDesign } from "./orbit.design";
 import { pagesRegistry } from "./pages.registry";
 import { presentersRegistry } from "./presenters.registry";
 import { resolveOrbitPageConfig } from "./resolveOrbitPageConfig";
@@ -63,6 +64,8 @@ export default function OrbitPageShell({
   disableStickyGuide = false,
 }: OrbitPageShellProps) {
   const heroRef = useRef<HTMLElement | null>(null);
+
+  const mergedDesign = useMemo(() => mergeOrbitPageDesign(design), [design]);
 
   const page = useMemo(() => {
     if (content && pageId) {
@@ -154,13 +157,16 @@ export default function OrbitPageShell({
   const footerDockActive = footerDockOffsetPx > 0;
 
   const contentVars = {
-    "--orbit-content-left-offset": "220px",
+    "--orbit-content-left-offset": `${mergedDesign.layout.contentLeftOffsetPx}px`,
   } as CSSProperties;
 
   const seamFadeBackground =
     themeMode === "dark"
       ? "linear-gradient(to bottom, rgba(9,11,18,0), rgba(9,11,18,0.16) 38%, rgba(9,11,18,0.72) 100%)"
       : "linear-gradient(to bottom, rgba(246,243,239,0), rgba(246,243,239,0.18) 38%, rgba(246,243,239,0.82) 100%)";
+
+  const stickyGuideEnabled =
+    !disableStickyGuide && (content?.stickyGuide?.enabled ?? true);
 
   return (
     <div className="orbit-page-shell relative">
@@ -181,7 +187,7 @@ export default function OrbitPageShell({
         pauseMotion={footerDockActive}
       />
 
-      {!disableStickyGuide ? (
+      {stickyGuideEnabled ? (
         <StickyGuide
           presenter={presenter}
           themeMode={themeMode}
