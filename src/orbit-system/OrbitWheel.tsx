@@ -60,12 +60,12 @@ function measureOrbitItem(item: OrbitItemConfig): MeasuredItem {
       titleText,
       spoilerText,
       eyebrowText,
-      baseMinSizePx: 150,
-      baseMaxSizePx: 230,
-      hoverMinSizePx: 168,
-      hoverMaxSizePx: 250,
-      baseFluidVw: 15.2,
-      hoverFluidVw: 16.4,
+      baseMinSizePx: 154,
+      baseMaxSizePx: 232,
+      hoverMinSizePx: 172,
+      hoverMaxSizePx: 252,
+      baseFluidVw: 15.4,
+      hoverFluidVw: 16.6,
       baseRadiusPercent: clamp(
         35 + (item.radiusBoostPercent ?? 0),
         35,
@@ -84,19 +84,19 @@ function measureOrbitItem(item: OrbitItemConfig): MeasuredItem {
   const spoilerLength = spoilerText.length;
   const eyebrowLength = eyebrowText?.length ?? 0;
 
-  const compactScore = titleLength * 1.05 + eyebrowLength * 0.18;
+  const compactScore = titleLength * 1.02 + eyebrowLength * 0.15;
   const hoverScore =
-    titleLength * 1.05 +
-    Math.min(spoilerLength, 180) * 0.55 +
-    eyebrowLength * 0.24;
+    titleLength * 1.04 +
+    Math.min(spoilerLength, 200) * 0.5 +
+    eyebrowLength * 0.22;
 
-  const baseRequestedMin = 156;
+  const baseRequestedMin = 160;
   const baseRequestedMax = 238;
-  const hoverRequestedMin = item.minBubbleSizePx ?? 228;
-  const hoverRequestedMax = item.maxBubbleSizePx ?? 360;
+  const hoverRequestedMin = item.minBubbleSizePx ?? 244;
+  const hoverRequestedMax = item.maxBubbleSizePx ?? 374;
 
   const baseMaxSizePx = clamp(
-    172 + compactScore * 0.28,
+    176 + compactScore * 0.26,
     baseRequestedMin + 8,
     baseRequestedMax
   );
@@ -105,33 +105,33 @@ function measureOrbitItem(item: OrbitItemConfig): MeasuredItem {
     baseRequestedMin,
     baseMaxSizePx - 10
   );
-  const baseFluidVw = clamp(baseMaxSizePx / 14.4, 15.5, 18.4);
+  const baseFluidVw = clamp(baseMaxSizePx / 14.3, 15.6, 18.5);
 
   const hoverMaxSizePx = clamp(
-    236 + hoverScore * 0.42,
+    250 + hoverScore * 0.34,
     hoverRequestedMin + 12,
     hoverRequestedMax
   );
   const hoverMinSizePx = clamp(
-    hoverMaxSizePx * 0.84,
+    hoverMaxSizePx * 0.86,
     hoverRequestedMin,
     hoverMaxSizePx - 14
   );
-  const hoverFluidVw = clamp(hoverMaxSizePx / 12.2, 18.6, 24.4);
+  const hoverFluidVw = clamp(hoverMaxSizePx / 11.9, 19.4, 25.6);
 
   const baseRadiusPercent = clamp(
-    35.2 + (item.radiusBoostPercent ?? 0),
-    35.2,
-    45.5
+    35.4 + (item.radiusBoostPercent ?? 0),
+    35.4,
+    45.4
   );
 
   const hoverRadiusBoost =
-    Math.max(hoverMaxSizePx - 250, 0) / 22 +
-    Math.max(spoilerLength - 60, 0) / 80;
+    Math.max(hoverMaxSizePx - 260, 0) / 24 +
+    Math.max(spoilerLength - 70, 0) / 90;
 
   const hoverRadiusPercent = clamp(
-    36 + hoverRadiusBoost + (item.radiusBoostPercent ?? 0),
-    36,
+    36.2 + hoverRadiusBoost + (item.radiusBoostPercent ?? 0),
+    36.2,
     47
   );
 
@@ -149,14 +149,14 @@ function measureOrbitItem(item: OrbitItemConfig): MeasuredItem {
     hoverFluidVw,
     baseRadiusPercent,
     hoverRadiusPercent,
-    spoilerLines: item.maxSpoilerLines ?? 3,
+    spoilerLines: item.maxSpoilerLines ?? 4,
   };
 }
 
 export default function OrbitWheel({
   items,
   rotationDeg,
-  activeItemId,
+  activeItemId: _activeItemId,
   themeMode,
   onItemEnter,
   onItemLeave,
@@ -177,21 +177,21 @@ export default function OrbitWheel({
         : current.baseRadiusPercent;
 
     return Math.max(maxValue, candidate);
-  }, 35.5);
+  }, 35.6);
 
   const outerRingInsetPercent = clamp(
-    50 - (maxRadiusPercent + 4.2),
+    50 - (maxRadiusPercent + 4.1),
     5.2,
     13.2
   );
   const innerRingInsetPercent = clamp(
     50 - (maxRadiusPercent - 4.8),
-    13,
+    13.2,
     22.2
   );
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[900px]">
+    <div className="relative mx-auto aspect-square w-full max-w-[920px]">
       <div
         className="absolute rounded-full border"
         style={{
@@ -224,14 +224,12 @@ export default function OrbitWheel({
 
       {measuredItems.map((measured) => {
         const { item } = measured;
+        const isHovered = item.id === visualItemId;
 
         const renderedAngle = getRenderedItemClockAngle(
           item.baseAngleDeg,
           rotationDeg
         );
-
-        const isHovered = item.id === visualItemId;
-        const isSectionActive = item.id === activeItemId;
 
         const radiusPercent = isHovered
           ? measured.hoverRadiusPercent
@@ -242,9 +240,11 @@ export default function OrbitWheel({
         const minSizePx = isHovered
           ? measured.hoverMinSizePx
           : measured.baseMinSizePx;
+
         const maxSizePx = isHovered
           ? measured.hoverMaxSizePx
           : measured.baseMaxSizePx;
+
         const fluidVw = isHovered
           ? measured.hoverFluidVw
           : measured.baseFluidVw;
@@ -268,10 +268,6 @@ export default function OrbitWheel({
                 ? themeMode === "dark"
                   ? "rgba(255,235,205,0.74)"
                   : "rgba(170,90,30,0.34)"
-                : isSectionActive
-                ? themeMode === "dark"
-                  ? "rgba(255,255,255,0.30)"
-                  : "rgba(170,90,30,0.18)"
                 : themeMode === "dark"
                 ? "rgba(255,255,255,0.22)"
                 : "rgba(120,30,30,0.14)",
@@ -342,13 +338,11 @@ export default function OrbitWheel({
 
             {measured.hasRichContent ? (
               <span
-                className={`relative z-10 flex h-full w-full flex-col items-center text-center ${
-                  isHovered
-                    ? "justify-center px-5 py-5"
-                    : "justify-center px-4 py-4"
+                className={`relative z-10 flex h-full w-full flex-col items-center justify-center text-center ${
+                  isHovered ? "px-6 py-6" : "px-4 py-4"
                 }`}
                 style={{
-                  gap: isHovered ? "0.5rem" : "0.22rem",
+                  gap: isHovered ? "0.75rem" : "0.25rem",
                 }}
               >
                 {isHovered && measured.eyebrowText ? (
@@ -373,8 +367,8 @@ export default function OrbitWheel({
                 <span
                   className={
                     isHovered
-                      ? "text-[clamp(0.94rem,1.1vw,1.18rem)] font-bold leading-[1.24]"
-                      : "text-[clamp(0.98rem,1.25vw,1.34rem)] font-bold leading-[1.2]"
+                      ? "text-[clamp(0.96rem,1.08vw,1.18rem)] font-bold leading-[1.28]"
+                      : "text-[clamp(1rem,1.24vw,1.3rem)] font-bold leading-[1.2]"
                   }
                   style={{
                     color: isHovered
@@ -397,7 +391,7 @@ export default function OrbitWheel({
 
                 {isHovered && measured.spoilerText ? (
                   <span
-                    className="text-[clamp(0.68rem,0.82vw,0.82rem)] leading-[1.55]"
+                    className="text-[clamp(0.72rem,0.82vw,0.84rem)] leading-[1.65]"
                     style={{
                       ...getSpoilerClampStyle(measured.spoilerLines),
                       color:
