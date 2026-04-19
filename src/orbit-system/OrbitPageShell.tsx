@@ -12,37 +12,28 @@ import StickyGuide from "./StickyGuide";
 import TickerBanner from "./TickerBanner";
 import { pagesRegistry } from "./pages.registry";
 import { presentersRegistry } from "./presenters.registry";
+import { resolveOrbitPageConfig } from "./resolveOrbitPageConfig";
 import { useStickyGuideState } from "./useStickyGuideState";
-import { mergeOrbitPageDesign } from "./orbit.design";
 import type {
-  BubbleConfig,
   OrbitItemConfig,
   OrbitItemId,
   OrbitPageContentConfig,
   OrbitPageDesignConfig,
-  PageConfig,
   PageId,
   ThemeMode,
 } from "./orbit.types";
 
 type OrbitPageShellProps = {
   /**
-   * מצב חדש:
-   * הדף מעביר content משלו,
-   * והמערכת בונה מזה page resolved פנימי.
-   */
-  content?: OrbitPageContentConfig;
-
-  /**
-   * מצב ישן:
-   * fallback לדפים שעדיין לא הומרו.
+   * ברירת המחדל:
+   * pageId → תוכן פר-דף מתוך orbitContentRegistry → page config resolved
    */
   pageId?: PageId;
 
   /**
-   * override עיצובי גלובלי לדף,
-   * בלי לערב תוכן.
+   * override עתידי - אם רוצים לבנות דף בלי רישום קבוע
    */
+  content?: OrbitPageContentConfig;
   design?: Partial<OrbitPageDesignConfig>;
 
   children: ReactNode;
@@ -61,99 +52,9 @@ function getThemeModeFromDom(): ThemeMode {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
-function buildResolvedBubble(
-  bubble: OrbitPageContentConfig["stickyGuide"] extends infer T
-    ? T extends { bubbles: infer B }
-      ? B extends Array<infer Item>
-        ? Item
-        : never
-      : never
-    : never,
-  design: OrbitPageDesignConfig
-): BubbleConfig {
-  return {
-    id: bubble.id,
-    text: bubble.text,
-    showFromAfterHeroPx: bubble.showFromAfterHeroPx,
-    hideAfterHeroPx: bubble.hideAfterHeroPx,
-    dismissible:
-      bubble.dismissible ?? design.stickyGuide.bubble.dismissible,
-    maxWidthPx: design.stickyGuide.bubble.maxWidthPx,
-    offsetX: design.stickyGuide.bubble.offsetX,
-    offsetY: design.stickyGuide.bubble.offsetY,
-    enterMs: design.stickyGuide.bubble.enterMs,
-    exitMs: design.stickyGuide.bubble.exitMs,
-    holdMs: design.stickyGuide.bubble.holdMs,
-    fadeMs: design.stickyGuide.bubble.fadeMs,
-  };
-}
-
-function resolvePageFromContent(
-  content: OrbitPageContentConfig,
-  design: OrbitPageDesignConfig,
-  pageId?: PageId,
-  route?: string
-): PageConfig {
-  const resolvedOrbitItems: OrbitItemConfig[] = content.orbit.items.map((item) => ({
-    ...item,
-  }));
-
-  const stickyGuideContent = content.stickyGuide;
-  const tickerBannerContent = content.tickerBanner;
-
-  return {
-    pageId: pageId ?? "about",
-    route: route ?? "/",
-    presenterId: content.presenterId,
-
-    hero: {
-      titleLines: content.hero.titleLines,
-      introLines: content.hero.introLines,
-      headerOffsetPx: design.hero.headerOffsetPx,
-    },
-
-    orbit: {
-      items: resolvedOrbitItems,
-      rotationSpeedDegPerSec: design.orbit.rotationSpeedDegPerSec,
-      defaultLook: design.orbit.defaultLook,
-    },
-
-    stickyGuide: {
-      idleLook: design.stickyGuide.idleLook,
-      activationOffsetPx:
-        stickyGuideContent?.activationOffsetPx ??
-        design.stickyGuide.activationOffsetPx,
-      activationRatio:
-        stickyGuideContent?.activationRatio ??
-        design.stickyGuide.activationRatio,
-      showFromAfterHeroPx:
-        stickyGuideContent?.showFromAfterHeroPx ??
-        design.stickyGuide.showFromAfterHeroPx,
-      bubbles: (stickyGuideContent?.bubbles ?? []).map((bubble) =>
-        buildResolvedBubble(bubble, design)
-      ),
-    },
-
-    tickerBanner: {
-      enabled:
-        tickerBannerContent?.enabled ?? design.tickerBanner.enabled,
-      items: tickerBannerContent?.items ?? [],
-      heightPx: design.tickerBanner.heightPx,
-      bottomOffsetPx: design.tickerBanner.bottomOffsetPx,
-      opacity: design.tickerBanner.opacity,
-      loopDurationSec: design.tickerBanner.loopDurationSec,
-      showFromAfterHeroPx:
-        tickerBannerContent?.showFromAfterHeroPx ??
-        design.tickerBanner.showFromAfterHeroPx,
-      enterMs: design.tickerBanner.enterMs,
-      exitMs: design.tickerBanner.exitMs,
-    },
-  };
-}
-
 export default function OrbitPageShell({
-  content,
   pageId,
+  content,
   design,
   children,
   contentClassName = "",
@@ -163,34 +64,32 @@ export default function OrbitPageShell({
 }: OrbitPageShellProps) {
   const heroRef = useRef<HTMLElement | null>(null);
 
-  const mergedDesign = useMemo(
-    () => mergeOrbitPageDesign(design),
-    [design]
-  );
-
-  const fallbackPage = useMemo(
-    () => (pageId ? pagesRegistry[pageId] : null),
-    [pageId]
-  );
-
-  const page = useMemo<PageConfig>(() => {
-    if (content) {
-      return resolvePageFromContent(
-        content,
-        mergedDesign,
+  const page = useMemo(() => {
+    if (content && pageId) {
+      const route = pagesRegistry[pageId]?.route ?? "/";
+      return resolveOrbitPageConfig({
         pageId,
-        fallbackPage?.route
-      );
+        route,
+        content,
+        design,
+      });
     }
 
-    if (fallbackPage) {
-      return fallbackPage;
+    if (pageId) {
+      return pagesRegistry[pageId];
     }
 
-    throw new Error(
-      "OrbitPageShell requires either `content` or `pageId`."
-    );
-  }, [content, mergedDesign, pageId, fallbackPage]);
+    if (content) {
+      return resolveOrbitPageConfig({
+        pageId: "about",
+        route: "/",
+        content,
+        design,
+      });
+    }
+
+    throw new Error("OrbitPageShell requires pageId or content.");
+  }, [content, design, pageId]);
 
   const presenter = useMemo(
     () => presentersRegistry[page.presenterId],
@@ -255,20 +154,13 @@ export default function OrbitPageShell({
   const footerDockActive = footerDockOffsetPx > 0;
 
   const contentVars = {
-    "--orbit-content-left-offset": `${mergedDesign.layout.contentLeftOffsetPx}px`,
+    "--orbit-content-left-offset": "220px",
   } as CSSProperties;
 
   const seamFadeBackground =
     themeMode === "dark"
       ? "linear-gradient(to bottom, rgba(9,11,18,0), rgba(9,11,18,0.16) 38%, rgba(9,11,18,0.72) 100%)"
       : "linear-gradient(to bottom, rgba(246,243,239,0), rgba(246,243,239,0.18) 38%, rgba(246,243,239,0.82) 100%)";
-
-  const stickyGuideEnabledFromContent = content
-    ? content.stickyGuide?.enabled ?? true
-    : true;
-
-  const renderStickyGuide =
-    !disableStickyGuide && stickyGuideEnabledFromContent;
 
   return (
     <div className="orbit-page-shell relative">
@@ -289,7 +181,7 @@ export default function OrbitPageShell({
         pauseMotion={footerDockActive}
       />
 
-      {renderStickyGuide ? (
+      {!disableStickyGuide ? (
         <StickyGuide
           presenter={presenter}
           themeMode={themeMode}
