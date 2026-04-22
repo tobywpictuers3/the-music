@@ -129,7 +129,7 @@ export type StudentsPageBodyContent = {
 
 export const STUDENTS_PAGE_BODY_CONTENT: StudentsPageBodyContent = {
   heroQuote:
-    "כאן לא בונים רק שיעור טוב, אלא דרך יציבה ומוזיקלית שנשארת לאורך זמן — עם רמה, רצף, הקשבה וליווי אמיתי.",
+    "כאן לא בונים רק שיעור טוב, אלא דרך יציבה ומוזיקלית שנשארת לאורך זמן: עם רמה, רצף, הקשבה וליווי אמיתי.",
 
   topCta: {
     label: "לבדיקת התאמה למסלול",
