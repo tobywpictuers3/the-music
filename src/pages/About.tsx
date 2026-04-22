@@ -194,7 +194,7 @@ export default function About() {
   return (
     <InnerPageLayout
       title="אודות"
-      description="המוסיקה ואני — דרך משותפת של למעלה משלושה עשורים."
+      description="המוסיקה ואני: דרך משותפת של למעלה משלושה עשורים."
     >
       <OrbitPageShell
         pageId="about"
